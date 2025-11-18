@@ -1,12 +1,12 @@
 
 from dotenv import load_dotenv
-from buisness.twitch_buisness import TwitchBuisness
 import requests
 import logging
 import os
 
 load_dotenv()
 class TwitchApi:
+       
     """
     Handles Twitch API interactions for authentication, video fetching, and downloading.
     """
@@ -86,6 +86,23 @@ class TwitchApi:
         logging.error(f"Failed to fetch clip for broadcaster {brodcaster_id}: {response.text}")
         return []
     
+    def get_game_info(self, game_id):
+        """
+        Fetch game information from Twitch API using the game ID.
+
+        :param game_id: Twitch game ID.
+        :return: Game info dict or None if not found.
+        """
+        url = f"{self.BASE_URL}/games"
+        params = {"id": game_id}
+        response = requests.get(url, headers=self.headers, params=params)
+        if response.status_code == 200:
+            data = response.json().get("data", [])
+            if data:
+                return data[0]
+        logging.error(f"Failed to fetch game info for game_id {game_id}: {response.text}")
+        return None
+    
     def download_clips(self,broadcaster_id,clip_id,editor_id=""):
 
         url = f"{self.BASE_URL}/clips/downloads"
@@ -99,3 +116,4 @@ class TwitchApi:
             return response.json().get("data", [])
         logging.error(f"Failed to Download clip : {clip_id} for broadcaster {broadcaster_id}: {response.text}")
         return []
+    
