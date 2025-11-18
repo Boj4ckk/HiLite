@@ -8,7 +8,10 @@ from services.scraping_service import ScrapingService
 from buisness.scraping_buisness import ScrapingBuisness
 
 
+from services.youtube_service import YoutubeService
 
+
+"""
 load_dotenv()
 twitch_service = TwitchApi(os.getenv("CLIENT_ID"),os.getenv("CLIENT_SECRET"))
 
@@ -29,7 +32,8 @@ s_s = ScrapingService()
 s_b = ScrapingBuisness(s_s)
 s_b.dowload_clip(clip_url[0])
 
+"""
+load_dotenv()
 
-
-
-
+ys = YoutubeService(os.getenv("CLIENT_SECRET_FILE"),os.getenv("SCOPES"),os.getenv("API_SERVICE_NAME"),os.getenv("API_VERSION"))
+ys.upload_video("20240730_FantasticBreakableLionLitFam-ZzlHJ4he5G7m7cDK_portrait.mp4","ça tue #Short","nouveau #Short",["#Short","#valorant"],"private")
