@@ -5,7 +5,7 @@ import logging
 
 def setup_logger():
     logger = logging.getLogger("HiLiteLogger")
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
         fmt="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
@@ -17,7 +17,7 @@ def setup_logger():
         "app.log", maxBytes=5*1024*1024, backupCount=3
     )
     file_handler.setFormatter(formatter)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
     # Console handler
