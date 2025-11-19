@@ -1,0 +1,15 @@
+
+
+selenium==4.38.0
+undetected-chromedriver==3.5.5
+
+google-api-python-client==2.186.0
+google-auth==2.41.1
+google-auth-oauthlib==1.2.3
+google-auth-httplib2==0.2.1
+
+
+
+
+
+
