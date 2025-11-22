@@ -15,7 +15,7 @@ class YoutubeService:
     Handles authentication, API client initialization, and provides methods for search and channel data retrieval.
     """
 
-    def __init__(self, client_secret,scopes,api_service_name,api_version):
+    def __init__(self, client_secret,scopes=os.getenv("SCOPES"),api_service_name=os.getenv("API_SERVICE_NAME"),api_version=os.getenv("API_VERSION")):
         """
         Initialize the YouTube API client using OAuth2 credentials.
         Loads configuration from environment variables:
@@ -50,6 +50,7 @@ class YoutubeService:
         except Exception as e:
             # Log initialization errors
             logger.error(f"Error while initializing YouTube service: {e}")
+            raise  # Re-raise exception to prevent using uninitialized service
     
 
     def upload_video(self, file, title, description, tags, status):

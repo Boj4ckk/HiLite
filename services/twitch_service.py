@@ -1,5 +1,6 @@
 
 from dotenv import load_dotenv
+from datetime import datetime, timedelta, timezone
 import requests
 import logging
 import os
@@ -66,19 +67,29 @@ class TwitchApi:
         logging.error(f"Failed to fetch user ID for {username}: {response.text}")
         return None
     
-    def get_broadcaster_clips(self, brodcaster_id, filters=None):
+    def get_broadcaster_clips(self, brodcaster_id, filters={"first":50}):
         """
         Fetch videos for a given Twitch user based on filters.
 
         :param userId: Twitch user ID.
-        :param filters: Dictionary of filters (e.g., views, duration).
+        :param filters: Dictionary of filters (e.g., views, duration, started_at, ended_at).
+                       If not provided, defaults to clips from the last 7 days.
         :return: List of video metadata dictionaries.
         """
-       
         url = f"{self.BASE_URL}/clips"
         params = {"broadcaster_id": brodcaster_id}
-        if filters:
-            params.update(filters)
+        
+        # Set default time window if no filters provided
+        if filters.get("started_at") is None:
+            ended_at = datetime.now(timezone.utc)
+            started_at = ended_at - timedelta(days=7)
+            filters = {
+
+                "started_at": started_at.isoformat(),
+                "ended_at": ended_at.isoformat()
+            }
+        
+        params.update(filters)
         response = requests.get(url, headers=self.headers, params=params)
      
         if response.status_code == 200:
