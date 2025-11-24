@@ -12,8 +12,7 @@ class ElevenLabsService:
     
 
     def speach_to_text(self,video_path,language_code,model_id="scribe_v1",tag_audio_events=True,diarize=True):
-        eleven_labs_business = ElevenLabsBuisness()
-        audio_data = eleven_labs_business.extract_audio_bytes_from_video(video_path)
+        audio_data = ElevenLabsBuisness.extract_audio_bytes_from_video(video_path)
 
         transcription = self.eleven_labs_client.speech_to_text.convert(
             file=audio_data,
