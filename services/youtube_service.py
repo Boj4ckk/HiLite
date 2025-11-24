@@ -1,12 +1,10 @@
 
 import os
-from dotenv import load_dotenv
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import logging
 from googleapiclient.http import MediaFileUpload
 
-load_dotenv()
 logger = logging.getLogger("HiLiteLogger")
 
 class YoutubeService:
@@ -40,7 +38,7 @@ class YoutubeService:
                 self.client_secret,
                 self.scopes.split(","),
             )
-            credentials = flow.run_local_server(port=8080)
+            credentials = flow.run_local_server(port=8081)
             self.youtube_client = googleapiclient.discovery.build(
                 self.api_service_name,
                 self.api_version,

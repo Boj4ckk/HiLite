@@ -1,11 +1,9 @@
 
-from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 import requests
 import logging
 import os
 
-load_dotenv()
 class TwitchApi:
        
     """
