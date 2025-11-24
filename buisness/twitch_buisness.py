@@ -34,15 +34,39 @@ class TwitchBuisness:
         Fills template with broadcaster name, game name, and clip title.
         Logs each step in English.
         """
-        titles_template_path = str(Path(os.getenv("TITLES_TEMPLATE_PATH")))
         logger = logging.getLogger("HiLiteLogger")
+        
+        titles_template_path_env = os.getenv("TITLES_TEMPLATE_PATH")
+        if not titles_template_path_env:
+            logger.error("TITLES_TEMPLATE_PATH environment variable is not set")
+            return None
+        
+        titles_template_path = str(Path(titles_template_path_env))
+        
+        # Check if file exists
+        if not os.path.exists(titles_template_path):
+            logger.error(f"Title templates file not found: {titles_template_path}")
+            return None
 
         # Load title templates from file
         logger.info(f"Loading title templates from {titles_template_path}")
         try:
             with open(titles_template_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
+            
+            # Validate JSON structure
+            if not isinstance(data, dict) or "templates" not in data:
+                logger.error("Invalid title templates file structure: missing 'templates' key")
+                return None
+            
             title_templates = data["templates"]
+            if not isinstance(title_templates, list) or len(title_templates) == 0:
+                logger.error("Title templates list is empty or invalid")
+                return None
+                
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse title templates JSON: {e}")
+            return None
         except Exception as e:
             logger.error(f"Failed to load title templates: {e}")
             return None
