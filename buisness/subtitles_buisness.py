@@ -6,8 +6,8 @@ import pysrt
 import logging
 
 logger = logging.getLogger("HiLiteLogger")
-
 class SubtitlesBuisness:
+
     @staticmethod
     def generate_word_image(word, font_path, font_size, text_color, stroke_color, stroke_width, width=1280, height=130, img_path="word.png"):
         """Generate an image for a single word with specified styling."""
