@@ -80,7 +80,7 @@ class ScrapingService:
             logger.info("Download started successfully.")
             
             # Wait for download to complete
-            time.sleep(5)
+            time.sleep(10)
             
         except Exception as e:
             logger.error(f"Failed to download clip from {clip_url}: {e}")
