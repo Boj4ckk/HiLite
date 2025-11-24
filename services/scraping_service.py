@@ -20,24 +20,39 @@ class ScrapingService:
     def __init__(self):
         """
         Initialize Chrome driver with download preferences for Twitch clips.
+        
+        Raises:
+            ValueError: If TWITCH_CLIP_FOLDER_PATH is not set
+            Exception: If ChromeDriver fails to initialize
         """
-        options = ChromeOptions()
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--no-sandbox')
+        clip_folder_path = os.getenv("TWITCH_CLIP_FOLDER_PATH")
+        if not clip_folder_path:
+            raise ValueError("TWITCH_CLIP_FOLDER_PATH environment variable is not set")
         
-        # Convert relative path to absolute path
-        download_dir = Path(os.getenv("TWITCH_CLIP_FOLDER_PATH")).resolve()
-        download_dir.mkdir(parents=True, exist_ok=True)
-        
-        prefs = {
-            "download.default_directory": str(download_dir),
-            "download.prompt_for_download": False,
-            "directory_upgrade": True
-        }
-        options.add_experimental_option("prefs", prefs)
-        self.driver = Chrome(options=options)
-        logger.info(f"Scraping service initialized. Download directory: {download_dir}")
+        try:
+            options = ChromeOptions()
+            options.add_argument('--headless')
+            options.add_argument('--disable-gpu')
+            options.add_argument('--no-sandbox')
+            
+            # Convert relative path to absolute path
+            download_dir = Path(clip_folder_path).resolve()
+            download_dir.mkdir(parents=True, exist_ok=True)
+            
+            prefs = {
+                "download.default_directory": str(download_dir),
+                "download.prompt_for_download": False,
+                "directory_upgrade": True
+            }
+            options.add_experimental_option("prefs", prefs)
+            
+            logger.info("Initializing Chrome driver...")
+            self.driver = Chrome(options=options)
+            logger.info(f"Scraping service initialized. Download directory: {download_dir}")
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize Chrome driver: {e}")
+            raise Exception(f"ChromeDriver initialization failed: {e}") from e
 
     def accept_cookies(self):
         """
@@ -89,11 +104,29 @@ class ScrapingService:
     def close(self):
         """
         Close the browser and clean up driver resources.
+        Guaranteed to close the driver even if errors occur.
         """
-        try:
-            self.driver.quit()
-            logger.info("Scraping service closed.")
-        except Exception as e:
-            logger.warning(f"Error while closing driver: {e}")
+        if hasattr(self, 'driver') and self.driver:
+            try:
+                self.driver.quit()
+                logger.info("Scraping service closed successfully.")
+            except Exception as e:
+                logger.error(f"Error while closing driver: {e}")
+                # Force close anyway
+                try:
+                    self.driver.close()
+                except:
+                    pass
+        else:
+            logger.warning("Driver was not initialized, nothing to close")
+    
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - ensures driver is closed."""
+        self.close()
+        return False
 
    
