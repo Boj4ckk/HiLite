@@ -65,7 +65,7 @@ class SubtitlesBuisness:
         stroke_color,
         stroke_width,
         position_y_ratio=0.80,
-        temp_dir="temp/subtitles_temp"
+        temp_dir="tmp/subtitles_temp"
     ):
         """
         Create a video with animated word-by-word subtitles.
