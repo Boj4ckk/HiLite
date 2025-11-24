@@ -19,16 +19,13 @@ from buisness.scraping_buisness import ScrapingBuisness
 from services.youtube_service import YoutubeService
 from services.eleven_labs_service import ElevenLabsService
 from services.srt_service import SrtService
-from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
-import pysrt
 
 from buisness.subtitlesBuisness import SubtitlesBuisness
 
 
 from services.eleven_labs_service import ElevenLabsService
 from services.srt_service import SrtService
-from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
-import pysrt
+
 
 from buisness.subtitlesBuisness import SubtitlesBuisness
 
@@ -182,6 +179,7 @@ def get_clip_video_path():
 def subtitle_video(subtitle_font="C:/Windows/Fonts/arial.ttf", font_size=110):
     """Add subtitles to the single video in clip folder."""
     # Get the video path
+    time.sleep(10)
     video_path = get_clip_video_path()
     logger.info(f"Processing video: {video_path}")
     
@@ -193,7 +191,7 @@ def subtitle_video(subtitle_font="C:/Windows/Fonts/arial.ttf", font_size=110):
     video_output_path = str(edited_folder / f"{video_filename}_subtitled.mp4")
     
     # Generate transcription
-    elevenlabs_service = ElevenLabsService(os.getenv("ELEVEN_LABS_API_KEY"))
+    elevenlabs_service = ElevenLabsService(os.getenv("ELEVENLABS_API_KEY"))
     print("Generating transcription...")
     transcription = elevenlabs_service.speach_to_text(video_path, "fr")
 
