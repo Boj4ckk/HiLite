@@ -11,26 +11,25 @@ from pathlib import Path
 import time
 
 from tqdm import tqdm
+from config.logger_conf import setup_logger
 from services.twitch_service import TwitchApi
 from buisness.twitch_buisness import TwitchBuisness
 from services.scraping_service import ScrapingService
-from buisness.scraping_buisness import ScrapingBuisness
 
 
 from services.youtube_service import YoutubeService
 from services.eleven_labs_service import ElevenLabsService
 from services.srt_service import SrtService
 
-from buisness.subtitlesBuisness import SubtitlesBuisness
+from buisness.subtitles_buisness import SubtitlesBuisness
 
 
 from services.eleven_labs_service import ElevenLabsService
 from services.srt_service import SrtService
 
 
-from buisness.subtitlesBuisness import SubtitlesBuisness
-
-logger = logging.getLogger("HiLiteLogger")
+# Configurer le logger au démarrage
+logger = setup_logger()
 
 def load_blacklist():
     """Load all blacklisted clip IDs from CSV."""
@@ -189,7 +188,7 @@ def subtitle_video(subtitle_font="C:/Windows/Fonts/arial.ttf", font_size=110):
     # Generate transcription
     elevenlabs_service = ElevenLabsService(os.getenv("ELEVENLABS_API_KEY"))
     print("Generating transcription...")
-    transcription = elevenlabs_service.speach_to_text(video_path, "fr")
+    transcription = elevenlabs_service.speech_to_text(video_path, "fr")
 
     # Setup srt service - use only filename, not full path
     video_filename = Path(video_path).stem  # Get filename without extension
@@ -203,8 +202,7 @@ def subtitle_video(subtitle_font="C:/Windows/Fonts/arial.ttf", font_size=110):
 
     # Create subtitled video
     print("Adding subtitles to video...")
-    subtitle_buisness = SubtitlesBuisness()
-    subtitle_buisness.create_subtitled_video(
+    SubtitlesBuisness.create_subtitled_video(
         video_path,
         srt_path,
         video_output_path,
