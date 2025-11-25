@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  unit-test:
+    uses: ./.github/workflows/python-job.yaml
+    with:
+      python-version: 3.11
+      run-command: pytest tests/unit_tests
+  lint:
+    uses: ./.github/workflows/python-job.yaml
+    with:
+      python-version: 3.11
+      run-command: ruff check .
+  
+  format:
+    uses: ./.github/workflows/python-job.yaml
+    with:
+      python-version: 3.11
+      run-command: ruff format --check
+
