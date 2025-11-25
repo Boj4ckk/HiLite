@@ -2,24 +2,25 @@ name: CI
 
 on:
   push:
-    branches: [ main, unit_tests ]
+    branches: main
   pull_request:
-    branches: [ main, unit_tests ]
+    branches: main
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run tests
-        run: |
-          pytest unit_test
+  unit-test:
+    uses: ./.github/workflows/python-job.yaml
+    with:
+      python-version: 3.11
+      run-command: pytest tests/unit_tests
+  lint:
+    uses: ./.github/workflows/python-job.yaml
+    with:
+      python-version: 3.11
+      run-command: ruff check .
+  
+  format:
+    uses: ./.github/workflows/python-job.yaml
+    with:
+      python-version: 3.11
+      run-command: ruff format --check
+
