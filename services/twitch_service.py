@@ -11,8 +11,6 @@ class TwitchApi:
     Handles Twitch API interactions for authentication, video fetching, and downloading.
     """
 
-
-
     def __init__(self, clientId, clientSecret):
         """
         Initialize TwitchApi instance and authenticate.

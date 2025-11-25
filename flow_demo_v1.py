@@ -16,10 +16,6 @@ from buisness.subtitles_buisness import SubtitlesBuisness
 load_dotenv()
 
 
-
-
-
-
 # Configurer le logger au démarrage
 logger = setup_logger()
 
