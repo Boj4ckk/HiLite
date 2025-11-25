@@ -29,7 +29,7 @@ class SubtitlesBuisness:
             w = bbox[2] - bbox[0]
             draw.text(((width-w)/2, 0), word, font=font, fill=text_color, stroke_width=stroke_width, stroke_fill=stroke_color)
             img.save(img_path)
-            return img_path
+                return os.path.normpath(img_path)
         except OSError as e:
             logger.error(f"Failed to load font {font_path}: {e}")
             raise
@@ -69,7 +69,7 @@ class SubtitlesBuisness:
                     )
                     # Only add if image was successfully generated
                     if generated_path:
-                        img_infos.append((img_path, word_start, word_end))
+                            img_infos.append((os.path.normpath(img_path), word_start, word_end))
                 except Exception as e:
                     logger.warning(f"Skipping word '{word}' due to error: {e}")
                     continue
