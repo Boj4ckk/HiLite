@@ -13,8 +13,8 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     steps:
-      - uses: action/@checkout@v5
-      - uses: action/setup-python@v6
+      - uses: actions/@checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{inputs.python-version}}
 
