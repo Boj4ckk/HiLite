@@ -1,4 +1,3 @@
-import pytest
 from buisness.srt_buisness import SrtBuisness
 
 def test_seconds_to_srt_time_zero():

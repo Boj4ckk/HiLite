@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from services.twitch_service import TwitchApi
 
 @patch('services.twitch_service.requests.post')

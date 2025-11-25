@@ -115,7 +115,7 @@ class ScrapingService:
                 # Force close anyway
                 try:
                     self.driver.close()
-                except:
+                except Exception:
                     pass
         else:
             logger.warning("Driver was not initialized, nothing to close")

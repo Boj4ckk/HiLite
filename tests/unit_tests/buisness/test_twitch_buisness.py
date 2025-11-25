@@ -1,6 +1,4 @@
-import pytest
 import json
-from unittest.mock import MagicMock
 from buisness.twitch_buisness import TwitchBuisness
 
 def test_extract_clips_ids():

@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import patch, MagicMock
+
+import pytest
 from services.scraping_service import ScrapingService
 
 def test_init_success(monkeypatch):

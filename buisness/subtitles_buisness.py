@@ -13,7 +13,7 @@ class SubtitlesBuisness:
         """Generate an image for a single word with specified styling."""
         # Skip empty words
         if not word or not word.strip():
-            logger.warning(f"Skipping empty word for image generation")
+            logger.warning("Skipping empty word for image generation")
             return None
         
         # Verify font exists
@@ -29,7 +29,7 @@ class SubtitlesBuisness:
             w = bbox[2] - bbox[0]
             draw.text(((width-w)/2, 0), word, font=font, fill=text_color, stroke_width=stroke_width, stroke_fill=stroke_color)
             img.save(img_path)
-                return os.path.normpath(img_path)
+            return os.path.normpath(img_path)
         except OSError as e:
             logger.error(f"Failed to load font {font_path}: {e}")
             raise

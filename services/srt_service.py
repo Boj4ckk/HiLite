@@ -1,5 +1,4 @@
 from pathlib import Path
-from elevenlabs import types
 
 from buisness.srt_buisness import SrtBuisness
 import os
