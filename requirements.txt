@@ -11,10 +11,11 @@ google-auth-oauthlib==1.2.3
 google-auth-httplib2==0.2.1
 
 moviepy==1.0.3
-
 pysrt==1.1.2
-
 elevenLabs==2.23.0
+
+pytest==9.0.1
+ruff==0..14.6
 
 
 
