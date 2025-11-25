@@ -2,34 +2,78 @@ import pytest
 from unittest.mock import patch, MagicMock
 from services.twitch_service import TwitchApi
 
-def test_get_stream_info_success():
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {'data': [{'id': '123', 'title': 'Test Stream'}]}
-    with patch('services.twitch_service.requests.get', return_value=mock_response):
-        result = TwitchApi.get_stream_info('channel', 'token')
-        assert result == {'id': '123', 'title': 'Test Stream'}
+@patch('services.twitch_service.requests.post')
+def test_authenticate_success(mock_post):
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {"access_token": "token123"}
+    api = TwitchApi("id", "secret")
+    assert api.accessToken == "token123"
+    assert api.headers["Authorization"] == "Bearer token123"
 
-def test_get_stream_info_not_found():
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {'data': []}
-    with patch('services.twitch_service.requests.get', return_value=mock_response):
-        with pytest.raises(ValueError) as excinfo:
-            TwitchApi.get_stream_info('channel', 'token')
-        assert 'Stream not found' in str(excinfo.value)
+@patch('services.twitch_service.requests.post')
+def test_authenticate_failure(mock_post):
+    mock_post.return_value.status_code = 400
+    mock_post.return_value.json.return_value = {}
+    mock_post.return_value.raise_for_status.side_effect = Exception("fail")
+    with pytest.raises(Exception):
+        TwitchApi("id", "secret")
 
-def test_get_stream_info_api_error():
-    mock_response = MagicMock()
-    mock_response.status_code = 500
-    with patch('services.twitch_service.requests.get', return_value=mock_response):
-        with pytest.raises(Exception) as excinfo:
-            TwitchApi.get_stream_info('channel', 'token')
-        assert 'API request failed' in str(excinfo.value)
+@patch('services.twitch_service.requests.post')
+@patch.dict("os.environ", {"BASE_URL": "http://test"})
+@patch('services.twitch_service.requests.get')
+def test_get_broadcaster_id_success(mock_get, mock_post):
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {"access_token": "token123"}
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = {"data": [{"id": "broadcaster123"}]}
+    api = TwitchApi("id", "secret")
+    result = api.get_broadcaster_id("user")
+    assert result == "broadcaster123"
 
-@patch('services.twitch_service.TwitchApi.get_stream_info')
-def test_get_stream_title_integration(mock_get_info):
-    mock_get_info.return_value = {'id': '123', 'title': 'Test Stream'}
-    result = TwitchApi.get_stream_title('channel', 'token')
-    assert result == 'Test Stream'
-    mock_get_info.assert_called_once_with('channel', 'token')
+@patch('services.twitch_service.requests.post')
+@patch.dict("os.environ", {"BASE_URL": "http://test"})
+@patch('services.twitch_service.requests.get')
+def test_get_broadcaster_id_not_found(mock_get, mock_post):
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {"access_token": "token123"}
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = {"data": []}
+    api = TwitchApi("id", "secret")
+    result = api.get_broadcaster_id("user")
+    assert result is None
+
+@patch('services.twitch_service.requests.post')
+@patch.dict("os.environ", {"BASE_URL": "http://test"})
+@patch('services.twitch_service.requests.get')
+def test_get_broadcaster_clips_success(mock_get, mock_post):
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {"access_token": "token123"}
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = {"data": [{"id": "clip1"}, {"id": "clip2"}]}
+    api = TwitchApi("id", "secret")
+    result = api.get_broadcaster_clips("broadcaster123")
+    assert isinstance(result, list)
+
+@patch('services.twitch_service.requests.post')
+@patch.dict("os.environ", {"BASE_URL": "http://test"})
+@patch('services.twitch_service.requests.get')
+def test_get_game_info_success(mock_get, mock_post):
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {"access_token": "token123"}
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = {"data": [{"id": "game1", "name": "GameName"}]}
+    api = TwitchApi("id", "secret")
+    result = api.get_game_info("game1")
+    assert result["name"] == "GameName"
+
+@patch('services.twitch_service.requests.post')
+@patch.dict("os.environ", {"BASE_URL": "http://test"})
+@patch('services.twitch_service.requests.get')
+def test_download_clips_success(mock_get, mock_post):
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.json.return_value = {"access_token": "token123"}
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = {"data": ["clipdata"]}
+    api = TwitchApi("id", "secret")
+    result = api.download_clips("broadcaster123", "clipid123")
+    assert result == ["clipdata"]

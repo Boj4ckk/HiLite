@@ -2,31 +2,33 @@ import pytest
 from unittest.mock import patch, MagicMock
 from services.srt_service import SrtService
 
-def test_parse_srt_success():
-    srt_content = "1\n00:00:01,000 --> 00:00:02,000\nHello world\n"
-    result = SrtService.parse_srt(srt_content)
-    assert isinstance(result, list)
-    assert len(result) == 1
-    assert result[0]['text'] == 'Hello world'
+import os
 
-def test_parse_srt_empty():
-    result = SrtService.parse_srt("")
-    assert result == []
+def test_init_sets_output_file(monkeypatch):
+    monkeypatch.setenv("SRT_DIR_PATH", "./tmp/srt_test")
+    service = SrtService("output.srt")
+    expected_path = os.path.normpath("tmp/srt_test/output.srt")
+    assert expected_path in os.path.normpath(service.srt_output_file)
 
-def test_parse_srt_invalid_format():
-    srt_content = "Invalid SRT"
-    result = SrtService.parse_srt(srt_content)
-    assert result == []
+@patch("builtins.open", new_callable=MagicMock)
+@patch("buisness.srt_buisness.SrtBuisness.transcription_to_srt_lines")
+def test_convert_transcription_into_srt_success(mock_lines, mock_open, monkeypatch):
+    monkeypatch.setenv("SRT_DIR_PATH", "./tmp/srt_test")
+    mock_lines.return_value = ["1\n00:00:01,000 --> 00:00:02,000\nHello world"]
+    mock_transcription = MagicMock()
+    mock_transcription.words = [MagicMock()]
+    service = SrtService("output.srt")
+    result = service.convert_transcription_into_srt(mock_transcription)
+    expected_path = os.path.normpath(result)
+    assert expected_path in os.path.normpath(service.srt_output_file)
+    mock_open.assert_called_once_with(service.srt_output_file, "w", encoding="utf-8")
 
-@patch('services.srt_service.SrtService.parse_srt')
-def test_save_srt_file_success(mock_parse):
-    mock_parse.return_value = [{'text': 'Hello world'}]
-    with patch('builtins.open', new_callable=MagicMock) as mock_open:
-        SrtService.save_srt_file('file.srt', 'content')
-        mock_open.assert_called_once_with('file.srt', 'w', encoding='utf-8')
-
-@patch('builtins.open', new_callable=MagicMock)
-def test_save_srt_file_failure(mock_open):
-    mock_open.side_effect = IOError('Failed to open file')
-    with pytest.raises(IOError):
-        SrtService.save_srt_file('file.srt', 'content')
+@patch("builtins.open", new_callable=MagicMock)
+@patch("buisness.srt_buisness.SrtBuisness.transcription_to_srt_lines", side_effect=Exception("fail"))
+def test_convert_transcription_into_srt_failure(mock_lines, mock_open, monkeypatch):
+    monkeypatch.setenv("SRT_DIR_PATH", "./tmp/srt_test")
+    mock_transcription = MagicMock()
+    mock_transcription.words = [MagicMock()]
+    service = SrtService("output.srt")
+    with pytest.raises(Exception):
+        service.convert_transcription_into_srt(mock_transcription)
