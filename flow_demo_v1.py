@@ -1,31 +1,23 @@
-from dotenv import load_dotenv
-
-# Charger les variables d'environnement AVANT tous les autres imports
-load_dotenv()
-
 import csv
-import json
-import logging
 import os
 from pathlib import Path
 import time
 
-from tqdm import tqdm
+from dotenv import load_dotenv
 from config.logger_conf import setup_logger
 from services.twitch_service import TwitchApi
 from buisness.twitch_buisness import TwitchBuisness
 from services.scraping_service import ScrapingService
-
-
 from services.youtube_service import YoutubeService
 from services.eleven_labs_service import ElevenLabsService
 from services.srt_service import SrtService
-
 from buisness.subtitles_buisness import SubtitlesBuisness
 
+load_dotenv()
 
-from services.eleven_labs_service import ElevenLabsService
-from services.srt_service import SrtService
+
+
+
 
 
 # Configurer le logger au démarrage
@@ -126,7 +118,7 @@ def download_clip(clip_obj):
 
     scraping_service = ScrapingService()
     clip_url = clip_obj.get("url")
-    print(f"\rDownloading clip...", end="", flush=True)
+    print("\rDownloading clip...", end="", flush=True)
     scraping_service.download_clip(clip_url)
     scraping_service.close()
     print(" Done!")
@@ -281,7 +273,7 @@ def process_single_clip(broadcaster_name):
             status="public",
         )
 
-        print(f"\n Video uploaded successfully!")
+        print("\n Video uploaded successfully!")
         print(f"YouTube URL: https://www.youtube.com/watch?v={video_id}")
 
         print("\n" + "=" * 50)
@@ -320,7 +312,7 @@ if __name__ == "__main__":
             time.sleep(2)
 
     print(f"\n\n{'=' * 60}")
-    print(f"FINAL SUMMARY")
+    print("FINAL SUMMARY")
     print(f"{'=' * 60}")
     print(f"Successful: {successful}/{nb_clips}")
     print(f"Failed: {failed}/{nb_clips}")

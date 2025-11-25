@@ -11,7 +11,7 @@ class TwitchApi:
     Handles Twitch API interactions for authentication, video fetching, and downloading.
     """
 
-    BASE_URL = os.getenv("BASE_URL")
+
 
     def __init__(self, clientId, clientSecret):
         """
@@ -20,6 +20,7 @@ class TwitchApi:
         :param clientId: Twitch application client ID.
         :param clientSecret: Twitch application client secret.
         """
+        self.BASE_URL = os.getenv("BASE_URL")
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.accessToken = self.authenticate()

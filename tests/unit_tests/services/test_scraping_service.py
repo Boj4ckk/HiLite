@@ -7,7 +7,7 @@ from services.scraping_service import ScrapingService
 def test_init_success(monkeypatch):
     monkeypatch.setenv("TWITCH_CLIP_FOLDER_PATH", "./tmp/test_clips")
     with patch("services.scraping_service.Chrome") as mock_chrome:
-        with patch("services.scraping_service.ChromeOptions") as mock_options:
+        with patch("services.scraping_service.ChromeOptions"):
             with patch("pathlib.Path.mkdir") as mock_mkdir:
                 service = ScrapingService()
                 assert hasattr(service, "driver")
@@ -28,7 +28,7 @@ def test_init_no_env(monkeypatch):
 
 def test_close_success(monkeypatch):
     monkeypatch.setenv("TWITCH_CLIP_FOLDER_PATH", "./tmp/test_clips")
-    with patch("services.scraping_service.Chrome") as mock_chrome:
+    with patch("services.scraping_service.Chrome"):
         with patch("services.scraping_service.ChromeOptions"):
             with patch("pathlib.Path.mkdir"):
                 service = ScrapingService()
@@ -39,7 +39,7 @@ def test_close_success(monkeypatch):
 
 def test_context_manager(monkeypatch):
     monkeypatch.setenv("TWITCH_CLIP_FOLDER_PATH", "./tmp/test_clips")
-    with patch("services.scraping_service.Chrome") as mock_chrome:
+    with patch("services.scraping_service.Chrome"):
         with patch("services.scraping_service.ChromeOptions"):
             with patch("pathlib.Path.mkdir"):
                 with ScrapingService() as service:
