@@ -34,3 +34,15 @@ data/edited_clips/*.mp4
 # Temporary files
 temp/
 *.tmp
+tmp/
+temp/
+
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Linting
+.ruff_cache/
