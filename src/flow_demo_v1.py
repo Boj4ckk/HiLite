@@ -1,17 +1,19 @@
 import csv
 import os
-from pathlib import Path
 import time
+from pathlib import Path
 
 from dotenv import load_dotenv
-from config.logger_conf import setup_logger
-from services.twitch_service import TwitchApi
-from buisness.twitch_buisness import TwitchBuisness
-from services.scraping_service import ScrapingService
-from services.youtube_service import YoutubeService
-from services.eleven_labs_service import ElevenLabsService
-from services.srt_service import SrtService
+
 from buisness.subtitles_buisness import SubtitlesBuisness
+from buisness.twitch_buisness import TwitchBuisness
+from config.logger_conf import setup_logger
+from config.path_config import BASE_DIR
+from services.eleven_labs_service import ElevenLabsService
+from services.scraping_service import ScrapingService
+from services.srt_service import SrtService
+from services.twitch_service import TwitchApi
+from services.youtube_service import YoutubeService
 
 load_dotenv()
 
@@ -22,7 +24,7 @@ logger = setup_logger()
 
 def load_blacklist():
     """Load all blacklisted clip IDs from CSV."""
-    csv_path = os.getenv("TWITCH_CLIP_BLACKLIST_PATH")
+    csv_path = os.path.join(BASE_DIR, os.getenv("TWITCH_CLIP_BLACKLIST_PATH"))
 
     # Create file with header if it doesn't exist
     if not os.path.exists(csv_path):
@@ -38,7 +40,7 @@ def load_blacklist():
 
 def add_to_blacklist(clip_id, clip_url):
     """Add a clip to the blacklist."""
-    csv_path = os.getenv("TWITCH_CLIP_BLACKLIST_PATH")
+    csv_path = os.path.join(BASE_DIR, os.getenv("TWITCH_CLIP_BLACKLIST_PATH"))
     with open(csv_path, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([clip_id, clip_url])
@@ -91,7 +93,7 @@ def fetch_clips(broadcaster_name):
 
 def clean_clip_folder():
     """Remove all files from clip folder before downloading new clip."""
-    clip_folder = Path(os.getenv("TWITCH_CLIP_FOLDER_PATH"))
+    clip_folder = Path(os.path.join(BASE_DIR, os.getenv("TWITCH_CLIP_FOLDER_PATH")))
     for file in clip_folder.glob("*.mp4"):
         try:
             file.unlink()
@@ -116,6 +118,7 @@ def download_clip(clip_obj):
     clip_url = clip_obj.get("url")
     print("\rDownloading clip...", end="", flush=True)
     scraping_service.download_clip(clip_url)
+    time.sleep(3)
     scraping_service.close()
     print(" Done!")
     logger.info(f"Clip downloaded: {clip_url}")
@@ -145,7 +148,8 @@ def post_single_video_on_youtube(
 
 def get_clip_video_path():
     """Get the path of the single video file in clip folder."""
-    clip_folder = Path(os.getenv("TWITCH_CLIP_FOLDER_PATH"))
+    clip_folder = Path(os.path.join(BASE_DIR, os.getenv("TWITCH_CLIP_FOLDER_PATH")))
+    logger.info(f"clip folder : {clip_folder} ")
     video_files = list(clip_folder.glob("*.mp4"))
 
     if len(video_files) == 0:
@@ -166,7 +170,7 @@ def subtitle_video(subtitle_font="C:/Windows/Fonts/arial.ttf", font_size=110):
     logger.info(f"Processing video: {video_path}")
 
     # Output to edited_clips folder instead of same folder
-    edited_folder = Path(os.getenv("EDITED_CLIP_FOLDER"))
+    edited_folder = Path(os.path.join(BASE_DIR, os.getenv("EDITED_CLIP_FOLDER")))
     edited_folder.mkdir(parents=True, exist_ok=True)
 
     video_filename = Path(video_path).stem
@@ -284,7 +288,7 @@ def process_single_clip(broadcaster_name):
 
 
 if __name__ == "__main__":
-    nb_clips = 3
+    nb_clips = 2
     broadcaster_name = "Sniper_Biscuit"
 
     successful = 0
