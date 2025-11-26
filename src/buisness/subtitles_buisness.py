@@ -1,9 +1,10 @@
-from PIL import Image, ImageDraw, ImageFont
+import logging
 import os
 import shutil
-from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
+
 import pysrt
-import logging
+from moviepy.editor import CompositeVideoClip, ImageClip, VideoFileClip
+from PIL import Image, ImageDraw, ImageFont
 
 logger = logging.getLogger("HiLiteLogger")
 

@@ -1,8 +1,9 @@
 import json
 import logging
 import os
-from pathlib import Path
 import random
+from pathlib import Path
+
 from services.twitch_service import TwitchApi
 
 

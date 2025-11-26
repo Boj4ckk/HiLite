@@ -1,7 +1,8 @@
-from moviepy.editor import VideoFileClip
-import tempfile
-import os
 import logging
+import os
+import tempfile
+
+from moviepy.editor import VideoFileClip
 
 logger = logging.getLogger("HiLiteLogger")
 
