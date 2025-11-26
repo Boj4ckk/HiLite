@@ -1,2 +1,38 @@
+[project]
+name = "HiLite"
+version = "0.0.1"
+requires-python = ">=3.11"
+
+# Production dependencies
+dependencies = [
+    "python-dotenv>=1.2.1",
+    "selenium>=4.38.0",
+    "undetected-chromedriver>=3.5.5",
+    "google-api-python-client>=2.186.0",
+    "google-auth>=2.41.1",
+    "google-auth-oauthlib>=1.2.3",
+    "google-auth-httplib2>=0.2.1",
+    "moviepy==1.0.3",
+    "pysrt>=1.1.2",
+    "elevenlabs>=2.23.0",
+
+]
+
+# Dev dependencies
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.1",
+    "ruff>=0.14.6"
+]
+
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
+testpaths = ["tests"]
+python_files = "test_*.py"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+select = ["E", "F", "I", "W", "N"]  # Erreurs, pyflakes, imports, warnings, naming
+ignore = ["E501"]  # Ignore line-too-long (géré par formatter)
