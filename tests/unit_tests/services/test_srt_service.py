@@ -1,8 +1,9 @@
-import pytest
-from unittest.mock import patch, MagicMock
-from services.srt_service import SrtService
-
 import os
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from services.srt_service import SrtService
 
 
 def test_init_sets_output_file(monkeypatch):

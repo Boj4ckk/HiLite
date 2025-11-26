@@ -1,13 +1,15 @@
+from unittest.mock import MagicMock, mock_open, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, mock_open
-from buisness.eleven_labs_buisness import ElevenLabsBuisness
+
+from src.buisness.eleven_labs_buisness import ElevenLabsBuisness
 
 
-@patch("buisness.eleven_labs_buisness.VideoFileClip")
-@patch("buisness.eleven_labs_buisness.tempfile.NamedTemporaryFile")
+@patch("src.buisness.eleven_labs_buisness.VideoFileClip")
+@patch("src.buisness.eleven_labs_buisness.tempfile.NamedTemporaryFile")
 @patch("builtins.open", new_callable=mock_open, read_data=b"fake_audio_data")
-@patch("os.path.exists")
-@patch("os.remove")
+@patch("src.buisness.eleven_labs_buisness.os.path.exists")
+@patch("src.buisness.eleven_labs_buisness.os.remove")
 def test_extract_audio_bytes_success(
     mock_remove, mock_exists, mock_file, mock_tempfile, mock_video
 ):
@@ -38,7 +40,7 @@ def test_extract_audio_file_not_found(mock_exists):
     assert "Video file not found" in str(excinfo.value)
 
 
-@patch("buisness.eleven_labs_buisness.VideoFileClip")
+@patch("src.buisness.eleven_labs_buisness.VideoFileClip")
 @patch("os.path.exists")
 def test_extract_audio_no_audio_track(mock_exists, mock_video):
     mock_exists.return_value = True
@@ -51,8 +53,8 @@ def test_extract_audio_no_audio_track(mock_exists, mock_video):
     mock_video_instance.close.assert_called_once()
 
 
-@patch("buisness.eleven_labs_buisness.VideoFileClip")
-@patch("buisness.eleven_labs_buisness.tempfile.NamedTemporaryFile")
+@patch("src.buisness.eleven_labs_buisness.VideoFileClip")
+@patch("src.buisness.eleven_labs_buisness.tempfile.NamedTemporaryFile")
 @patch("os.path.exists")
 @patch("os.remove")
 def test_extract_audio_cleanup_on_error(
@@ -73,7 +75,7 @@ def test_extract_audio_cleanup_on_error(
     mock_audio.close.assert_called_once()
 
 
-@patch("buisness.eleven_labs_buisness.VideoFileClip")
+@patch("src.buisness.eleven_labs_buisness.VideoFileClip")
 @patch("buisness.eleven_labs_buisness.tempfile.NamedTemporaryFile")
 @patch("builtins.open", new_callable=mock_open, read_data=b"test_audio")
 @patch("os.path.exists")
