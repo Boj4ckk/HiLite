@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+.git/
+*.log
+.DS_Store
+.idea/
+.vscode/
+node_modules/
+
+# Exclude test output and coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# Exclude OS-specific files
+Thumbs.db
