@@ -1,0 +1,40 @@
+
+services:
+  test:
+    build:
+      context: .
+      target: test
+    image: hilite:test
+    command: echo "Tests completed"
+
+
+
+  app:
+    build:
+      context: .
+      target: prod
+    image: hilite:prod
+    container_name: hilite-app
+    depends_on:
+      test:
+        condition: service_completed_successfully
+    volumes:
+      - ./data:/app/data
+      - ./assetes:/app/assets
+      - ./tmp:/app/tmp
+    shm_size: '2gb'
+  
+
+  dev:
+    build:
+      context: .
+      target: prod
+    image: hilite:prod
+    container_name: hilite-dev-app
+    depends_on:
+      test:
+        condition: service_completed_successfully
+    volumes:
+      - ./src:/app/src
+    shm_size: '2gb'
+
