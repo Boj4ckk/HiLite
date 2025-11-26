@@ -1,7 +1,8 @@
+import logging
 import os
+
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
-import logging
 from googleapiclient.http import MediaFileUpload
 
 logger = logging.getLogger("HiLiteLogger")

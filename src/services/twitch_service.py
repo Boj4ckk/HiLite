@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta, timezone
-import requests
 import logging
 import os
+from datetime import datetime, timedelta, timezone
+
+import requests
 
 logger = logging.getLogger("HiLiteLogger")
 
@@ -11,19 +12,19 @@ class TwitchApi:
     Handles Twitch API interactions for authentication, video fetching, and downloading.
     """
 
-    def __init__(self, clientId, clientSecret):
+    def __init__(self, client_id, client_secret):
         """
         Initialize TwitchApi instance and authenticate.
 
-        :param clientId: Twitch application client ID.
-        :param clientSecret: Twitch application client secret.
+        :param client_id: Twitch application client ID.
+        :param client_secret: Twitch application client secret.
         """
         self.BASE_URL = os.getenv("BASE_URL")
-        self.clientId = clientId
-        self.clientSecret = clientSecret
+        self.client_id = client_id
+        self.client_secret = client_secret
         self.accessToken = self.authenticate()
         self.headers = {
-            "Client-Id": self.clientId,
+            "Client-Id": self.client_id,
             "Authorization": f"Bearer {self.accessToken}",
         }
 
@@ -36,8 +37,8 @@ class TwitchApi:
         """
         url = "https://id.twitch.tv/oauth2/token"
         payload = {
-            "client_id": self.clientId,
-            "client_secret": self.clientSecret,
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
             "grant_type": "client_credentials",
         }
 
