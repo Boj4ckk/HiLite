@@ -7,17 +7,14 @@ class Settings(BaseSettings):
     """Configuration of the app"""
 
     # ============= SECRETS =============
-    # Twitch
-    TWITCH_CLIENT_ID: str
-    TWITCH_CLIENT_SECRET: str
+    TWITCH_CLIENT_ID: str = "test_twitch_client_id"
+    TWITCH_CLIENT_SECRET: str = "test_twitch_secret"
 
-    # Youtube
-    CLIENT_ID: str
-    CLIENT_SECRET_FILE: str
-    YT_TOKEN_PATH: str
-
-    # Elevenlabs
-    ELEVENLABS_API_KEY: str
+    CLIENT_ID: str = "test_youtube_client_id"
+    CLIENT_SECRET_FILE: str = "tests/fixtures/client_secret.json"
+    YT_TOKEN_PATH: str = "tests/fixtures/youtube_token.json"
+    
+    ELEVENLABS_API_KEY: str = "test_elevenlabs_key"
 
     # ============= Buisness Conf =============
     # Twitch
