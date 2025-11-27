@@ -20,7 +20,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./data:/app/data
-      - ./assetes:/app/assets
+      - ./assets:/app/assets
       - ./tmp:/app/tmp
     environment:
       - CLIENT_SECRET_FILE=${YOUTUBE_CLIENT_SECRET_FILE}
