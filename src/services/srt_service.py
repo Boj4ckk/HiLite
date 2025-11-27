@@ -1,8 +1,8 @@
 import logging
-import os
 from pathlib import Path
 
 from buisness.srt_buisness import SrtBuisness
+from config.settings import settings
 
 logger = logging.getLogger("HiLiteLogger")
 
@@ -18,7 +18,7 @@ class SrtService:
         Raises:
             ValueError: If SRT_DIR_PATH is not set
         """
-        srt_dir = os.getenv("SRT_DIR_PATH")
+        srt_dir = settings.SRT_DIR_PATH
         if not srt_dir:
             # Use default value if not set
             srt_dir = "tmp/srt"

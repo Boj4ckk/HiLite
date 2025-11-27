@@ -15,6 +15,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from undetected_chromedriver import Chrome, ChromeOptions
 
 from config.path_config import BASE_DIR
+from config.settings import settings
 
 logger = logging.getLogger("HiLiteLogger")
 
@@ -33,7 +34,7 @@ class ScrapingService:
             ValueError: If TWITCH_CLIP_FOLDER_PATH is not set
             Exception: If ChromeDriver fails to initialize
         """
-        clip_folder_path = os.getenv("TWITCH_CLIP_FOLDER_PATH")
+        clip_folder_path = settings.TWITCH_CLIP_FOLDER_PATH
         if not clip_folder_path:
             raise ValueError("TWITCH_CLIP_FOLDER_PATH environment variable is not set")
 

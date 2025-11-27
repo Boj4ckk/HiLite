@@ -1,8 +1,9 @@
 import logging
-import os
 from datetime import datetime, timedelta, timezone
 
 import requests
+
+from config.settings import settings
 
 logger = logging.getLogger("HiLiteLogger")
 
@@ -19,7 +20,7 @@ class TwitchApi:
         :param client_id: Twitch application client ID.
         :param client_secret: Twitch application client secret.
         """
-        self.BASE_URL = os.getenv("BASE_URL")
+        self.BASE_URL = settings.BASE_URL
         self.client_id = client_id
         self.client_secret = client_secret
         self.accessToken = self.authenticate()

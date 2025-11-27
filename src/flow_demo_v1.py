@@ -9,6 +9,7 @@ from buisness.subtitles_buisness import SubtitlesBuisness
 from buisness.twitch_buisness import TwitchBuisness
 from config.logger_conf import setup_logger
 from config.path_config import BASE_DIR
+from config.settings import settings
 from services.eleven_labs_service import ElevenLabsService
 from services.scraping_service import ScrapingService
 from services.srt_service import SrtService
@@ -24,7 +25,7 @@ logger = setup_logger()
 
 def load_blacklist():
     """Load all blacklisted clip IDs from CSV."""
-    csv_path = os.path.join(BASE_DIR, os.getenv("TWITCH_CLIP_BLACKLIST_PATH"))
+    csv_path = os.path.join(BASE_DIR, settings.TWITCH_CLIP_BLACKLIST_PATH)
 
     # Create file with header if it doesn't exist
     if not os.path.exists(csv_path):
@@ -40,7 +41,7 @@ def load_blacklist():
 
 def add_to_blacklist(clip_id, clip_url):
     """Add a clip to the blacklist."""
-    csv_path = os.path.join(BASE_DIR, os.getenv("TWITCH_CLIP_BLACKLIST_PATH"))
+    csv_path = os.path.join(BASE_DIR, settings.TWITCH_CLIP_BLACKLIST_PATH)
     with open(csv_path, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([clip_id, clip_url])
@@ -64,9 +65,7 @@ def find_new_clip(clips):
 def fetch_clips(broadcaster_name):
     """Fetch clips and return the first one not in blacklist."""
     # Init twitch service
-    twitch_service = TwitchApi(
-        os.getenv("TWITCH_CLIENT_ID"), os.getenv("TWITCH_CLIENT_SECRET")
-    )
+    twitch_service = TwitchApi(settings.TWITCH_CLIENT_ID, settings.TWITCH_CLIENT_SECRET)
 
     # Fetch broadcaster clips (50 by default)
     broadcaster_id = twitch_service.get_broadcaster_id(broadcaster_name)
@@ -93,7 +92,7 @@ def fetch_clips(broadcaster_name):
 
 def clean_clip_folder():
     """Remove all files from clip folder before downloading new clip."""
-    clip_folder = Path(os.path.join(BASE_DIR, os.getenv("TWITCH_CLIP_FOLDER_PATH")))
+    clip_folder = Path(os.path.join(BASE_DIR, settings.TWITCH_CLIP_FOLDER_PATH))
     for file in clip_folder.glob("*.mp4"):
         try:
             file.unlink()
@@ -132,10 +131,10 @@ def post_single_video_on_youtube(
         tags = ["gaming", "twitch", "clips"]
 
     youtube_service = YoutubeService(
-        os.getenv("CLIENT_SECRET_FILE"),
-        os.getenv("SCOPES"),
-        os.getenv("API_SERVICE_NAME"),
-        os.getenv("API_VERSION"),
+        settings.CLIENT_SECRET_FILE,
+        settings.SCOPES,
+        settings.API_SERVICE_NAME,
+        settings.API_VERSION,
     )
 
     video_id = youtube_service.upload_video(
@@ -148,7 +147,7 @@ def post_single_video_on_youtube(
 
 def get_clip_video_path():
     """Get the path of the single video file in clip folder."""
-    clip_folder = Path(os.path.join(BASE_DIR, os.getenv("TWITCH_CLIP_FOLDER_PATH")))
+    clip_folder = Path(os.path.join(BASE_DIR, settings.TWITCH_CLIP_FOLDER_PATH))
     logger.info(f"clip folder : {clip_folder} ")
     video_files = list(clip_folder.glob("*.mp4"))
 
@@ -170,14 +169,14 @@ def subtitle_video(subtitle_font="C:/Windows/Fonts/arial.ttf", font_size=110):
     logger.info(f"Processing video: {video_path}")
 
     # Output to edited_clips folder instead of same folder
-    edited_folder = Path(os.path.join(BASE_DIR, os.getenv("EDITED_CLIP_FOLDER")))
+    edited_folder = Path(os.path.join(BASE_DIR, settings.EDITED_CLIP_FOLDER))
     edited_folder.mkdir(parents=True, exist_ok=True)
 
     video_filename = Path(video_path).stem
     video_output_path = str(edited_folder / f"{video_filename}_subtitled.mp4")
 
     # Generate transcription
-    elevenlabs_service = ElevenLabsService(os.getenv("ELEVENLABS_API_KEY"))
+    elevenlabs_service = ElevenLabsService(settings.ELEVENLABS_API_KEY)
     print("Generating transcription...")
     transcription = elevenlabs_service.speech_to_text(video_path, "fr")
 
@@ -241,7 +240,7 @@ def process_single_clip(broadcaster_name):
 
         # Generate title using template
         twitch_service = TwitchApi(
-            os.getenv("TWITCH_CLIENT_ID"), os.getenv("TWITCH_CLIENT_SECRET")
+            settings.TWITCH_CLIENT_ID, settings.TWITCH_CLIENT_SECRET
         )
         twitch_business = TwitchBuisness()
         youtube_title = twitch_business.generate_short_title(twitch_service, clip)
