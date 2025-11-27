@@ -52,7 +52,7 @@ FROM builder as prod
 RUN groupadd -g 1001 appuser && \
     useradd -r -u 1001 -g appuser appuser && \
     mkdir /home/appuser && \
-    mkdir /app/tmp
+    mkdir /app/tmp && \
     chown -R appuser:appuser /home/appuser
 
 
