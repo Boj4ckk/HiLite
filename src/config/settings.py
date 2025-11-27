@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     CLIENT_ID: str = "test_youtube_client_id"
     CLIENT_SECRET_FILE: str = "tests/fixtures/client_secret.json"
     YT_TOKEN_PATH: str = "tests/fixtures/youtube_token.json"
-    
+
     ELEVENLABS_API_KEY: str = "test_elevenlabs_key"
 
     # ============= Buisness Conf =============
