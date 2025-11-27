@@ -52,7 +52,7 @@ class ScrapingService:
             options.add_argument("--window-size=1920,1080")
 
             # Forcer le profil Chrome dans un dossier accessible
-            profile_dir = os.path.join(BASE_DIR, "tmp", "chrome_profile")
+            profile_dir = os.path.join("/tmp", "chrome_profile")
             logger.info(f"{profile_dir}")
             Path(profile_dir).mkdir(parents=True, exist_ok=True)
             options.add_argument(f"--user-data-dir={profile_dir}")
