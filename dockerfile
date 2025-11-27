@@ -31,7 +31,6 @@ RUN pip install --upgrade pip && \
     pip install .
 
 
-
 FROM builder as test
 
 ENV PATH="/opt/venv/bin:$PATH"
@@ -61,6 +60,8 @@ WORKDIR /app
 COPY --chown=appuser:appuser . .
 
 USER appuser
+
+CMD ["bash", "-c", "cd src && python run.py"]
 
 
 
