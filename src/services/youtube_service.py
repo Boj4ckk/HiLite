@@ -8,6 +8,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.http import MediaFileUpload
 
 from config.path_config import BASE_DIR
+from config.settings import settings
 
 logger = logging.getLogger("HiLiteLogger")
 
@@ -38,12 +39,12 @@ class YoutubeService:
             Exception: If authentication or client initialization fails.
         """
         # Load from env if not provided
-        self.scopes = scopes or os.getenv("SCOPES")
-        self.api_service_name = api_service_name or os.getenv("API_SERVICE_NAME")
-        self.api_version = api_version or os.getenv("API_VERSION")
+        self.scopes = scopes or settings.SCOPES
+        self.api_service_name = api_service_name or settings.API_SERVICE_NAME
+        self.api_version = api_version or settings.API_VERSION
 
         # Token file path
-        token_path = os.getenv("YT_TOKEN_PATH")
+        token_path = settings.YT_TOKEN_PATH
         if not token_path:
             raise ValueError("YT_TOKEN_PATH environment variable not set")
 

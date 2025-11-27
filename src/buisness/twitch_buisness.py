@@ -4,6 +4,7 @@ import os
 import random
 from pathlib import Path
 
+from config.settings import settings
 from services.twitch_service import TwitchApi
 
 
@@ -32,7 +33,7 @@ class TwitchBuisness:
         """
         logger = logging.getLogger("HiLiteLogger")
 
-        titles_template_path_env = os.getenv("TITLES_TEMPLATE_PATH")
+        titles_template_path_env = settings.TITLES_TEMPLATE_PATH
         if not titles_template_path_env:
             logger.error("TITLES_TEMPLATE_PATH environment variable is not set")
             return None

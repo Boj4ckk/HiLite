@@ -2,13 +2,17 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from services.scraping_service import ScrapingService
+from src.services.scraping_service import ScrapingService
 
 
 def test_init_success(monkeypatch):
-    monkeypatch.setenv("TWITCH_CLIP_FOLDER_PATH", "./tmp/test_clips")
-    with patch("services.scraping_service.Chrome") as mock_chrome:
-        with patch("services.scraping_service.ChromeOptions"):
+    monkeypatch.setattr(
+        "src.services.scraping_service.settings.TWITCH_CLIP_FOLDER_PATH",
+        "./tmp/test_clips",
+        raising=False,
+    )
+    with patch("src.services.scraping_service.Chrome") as mock_chrome:
+        with patch("src.services.scraping_service.ChromeOptions"):
             with patch("pathlib.Path.mkdir") as mock_mkdir:
                 service = ScrapingService()
                 assert hasattr(service, "driver")
@@ -17,9 +21,13 @@ def test_init_success(monkeypatch):
 
 
 def test_init_no_env(monkeypatch):
-    monkeypatch.delenv("TWITCH_CLIP_FOLDER_PATH", raising=False)
-    with patch("services.scraping_service.ChromeOptions"):
-        with patch("services.scraping_service.Chrome"):
+    monkeypatch.setattr(
+        "src.services.scraping_service.settings.TWITCH_CLIP_FOLDER_PATH",
+        "",
+        raising=False,
+    )
+    with patch("src.services.scraping_service.ChromeOptions"):
+        with patch("src.services.scraping_service.Chrome"):
             with pytest.raises(ValueError) as excinfo:
                 ScrapingService()
             assert "TWITCH_CLIP_FOLDER_PATH environment variable is not set" in str(
@@ -28,9 +36,13 @@ def test_init_no_env(monkeypatch):
 
 
 def test_close_success(monkeypatch):
-    monkeypatch.setenv("TWITCH_CLIP_FOLDER_PATH", "./tmp/test_clips")
-    with patch("services.scraping_service.Chrome"):
-        with patch("services.scraping_service.ChromeOptions"):
+    monkeypatch.setattr(
+        "src.services.scraping_service.settings.TWITCH_CLIP_FOLDER_PATH",
+        "./tmp/test_clips",
+        raising=False,
+    )
+    with patch("src.services.scraping_service.Chrome"):
+        with patch("src.services.scraping_service.ChromeOptions"):
             with patch("pathlib.Path.mkdir"):
                 service = ScrapingService()
                 service.driver = MagicMock()
@@ -39,9 +51,13 @@ def test_close_success(monkeypatch):
 
 
 def test_context_manager(monkeypatch):
-    monkeypatch.setenv("TWITCH_CLIP_FOLDER_PATH", "./tmp/test_clips")
-    with patch("services.scraping_service.Chrome"):
-        with patch("services.scraping_service.ChromeOptions"):
+    monkeypatch.setattr(
+        "src.services.scraping_service.settings.TWITCH_CLIP_FOLDER_PATH",
+        "./tmp/test_clips",
+        raising=False,
+    )
+    with patch("src.services.scraping_service.Chrome"):
+        with patch("src.services.scraping_service.ChromeOptions"):
             with patch("pathlib.Path.mkdir"):
                 with ScrapingService() as service:
                     assert hasattr(service, "driver")

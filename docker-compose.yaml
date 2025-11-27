@@ -22,6 +22,13 @@ services:
       - ./data:/app/data
       - ./assetes:/app/assets
       - ./tmp:/app/tmp
+    environment:
+      - CLIENT_SECRET_FILE=${YOUTUBE_CLIENT_SECRET_FILE}
+      - CLIENT_ID=${YOUTUBE_CLIENT_ID}
+      - YT_TOKEN=${YOUTUBE_CREDENTIAL_TOKEN}
+      - TWITCH_CLIENT_ID=${TWITCH_CLIENT_ID}
+      - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
     shm_size: '2gb'
   
 
@@ -36,5 +43,13 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./src:/app/src
+      - ./secrets:/etc/secrets
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET_FILE=${CLIENT_SECRET_FILE}
+      - TWITCH_CLIENT_ID=${TWITCH_CLIENT_ID}
+      - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
+      - YT_TOKEN_PATH=${YT_TOKEN_PATH}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
     shm_size: '2gb'
 
