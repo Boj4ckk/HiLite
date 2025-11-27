@@ -40,19 +40,17 @@ class YoutubeService:
         self.scopes = scopes or os.getenv("SCOPES")
         self.api_service_name = api_service_name or os.getenv("API_SERVICE_NAME")
         self.api_version = api_version or os.getenv("API_VERSION")
-        
 
         # Token file path
         token_path = os.getenv("YT_TOKEN_PATH")
         if not token_path:
             raise ValueError("YT_TOKEN_PATH environment variable not set")
 
-        self.token = os.path.join(BASE_DIR,token_path)
+        self.token = os.path.join(BASE_DIR, token_path)
 
-        token_dir = os.path.dirname(self.token) #dir of the file
+        token_dir = os.path.dirname(self.token)  # dir of the file
         os.makedirs(token_dir, exist_ok=True)
         logger.info(f"Token will be saved to {self.token}")
-
 
         # Validate required parameters
         if not client_secret:
@@ -76,9 +74,7 @@ class YoutubeService:
 
             # Create youtube client
             self.youtube_client = googleapiclient.discovery.build(
-                self.api_service_name, 
-                self.api_version, 
-                credentials=credentials
+                self.api_service_name, self.api_version, credentials=credentials
             )
             logger.info("YouTube service initialized successfully")
 
@@ -90,14 +86,13 @@ class YoutubeService:
             logger.error(f"Error while initializing YouTube service: {e}")
             raise Exception(f"Failed to initialize YouTube service: {e}") from e
 
-
     def _get_credentials(self):
         """
         Get valid credentials, refreshing or requesting new auth if needed.
-        
+
         Returns:
             Credentials: Valid OAuth2 credentials with refresh token
-            
+
         Raises:
             Exception: If authentication fails
         """
@@ -107,18 +102,17 @@ class YoutubeService:
         if os.path.exists(self.token):
             try:
                 credentials = Credentials.from_authorized_user_file(
-                    self.token,
-                    self.scopes.split(",")
+                    self.token, self.scopes.split(",")
                 )
                 logger.info("Loaded existing credntials from token file")
             except Exception as e:
                 logger.warning(f"Failed to load credentials: {e}")
-        
+
         # Refresh if token is expired but refresh token is available
         if credentials and credentials.expired and credentials.refresh_token:
             try:
                 logger.info("Token expired, refreshing...")
-                credentials.refresh(Request()) # Refresh token
+                credentials.refresh(Request())  # Refresh token
 
                 # Save refreshed token
                 with open(self.token, "w") as f:
@@ -129,22 +123,24 @@ class YoutubeService:
             except Exception as e:
                 logger.error(f"Failed to refresh token: {e}")
                 credentials = None
-        
+
         # Need fisrt/new auth
         if not credentials or not credentials.valid:
             logger.info("Starting OAuth2 flow for new credentials...")
 
             try:
-                flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-                    self.client_secret,
-                    self.scopes.split(","),
+                flow = (
+                    google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+                        self.client_secret,
+                        self.scopes.split(","),
+                    )
                 )
                 flow.oauth2session.redirect_uri = f"http://localhost:/{self.port}/"
 
                 auth_url, _ = flow.authorization_url(
                     access_type="offline",
                     prompt="consent",
-                    include_granted_scopes="true"
+                    include_granted_scopes="true",
                 )
 
                 logger.info("Opening brower for authorization")
@@ -152,11 +148,10 @@ class YoutubeService:
                 # Starting local server
                 try:
                     credentials = flow.run_local_server(
-                        port=self.port,
-                        open_browser=True
+                        port=self.port, open_browser=True
                     )
                 except OSError as e:
-                    if(
+                    if (
                         "Adress already is use" in str(e)
                         or "WinError 10048" in (e)
                         or "WinErro 10013 in" in (e)
@@ -165,12 +160,11 @@ class YoutubeService:
                             f"Port {self.port} is occupied, tryping port {self.port + 1}"
                         )
                         credentials = flow.run_local_server(
-                            port=self.port + 1,
-                            open_browser=True
+                            port=self.port + 1, open_browser=True
                         )
                     else:
                         raise
-                
+
                 if not credentials.refresh_token:
                     logger.warning(
                         "       No refresh_token received! This can happen if:\n"
@@ -181,20 +175,13 @@ class YoutubeService:
                     )
                 else:
                     logger.info("Refresh token obtained successfully")
-                
+
                 with open(self.token, "w") as f:
                     f.write(credentials.to_json())
                 logger.info(f"Credentials saved to {self.token}")
             except Exception as e:
                 logger.error(f"OAuth flow failed: {e}")
         return credentials
-        
-
-
-
-
-
-
 
     def upload_video(self, file, title, description, tags, status):
         """
