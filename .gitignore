@@ -1,6 +1,7 @@
 # Environment variables and secrets
 .env
 client_secret_2.json
+youtube_token.json
 
 # Logs
 app.log
