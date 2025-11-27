@@ -131,12 +131,13 @@ def post_single_video_on_youtube(
     if tags is None:
         tags = ["gaming", "twitch", "clips"]
 
+    
     youtube_service = YoutubeService(
-        os.getenv("CLIENT_SECRET_FILE"),
-        os.getenv("SCOPES"),
-        os.getenv("API_SERVICE_NAME"),
-        os.getenv("API_VERSION"),
-    )
+        os.path.join(BASE_DIR,os.getenv("CLIENT_SECRET_FILE")),
+        os.path.join(os.getenv("SCOPES")),
+        os.path.join(os.getenv("API_SERVICE_NAME")),
+        os.path.join(os.getenv("API_VERSION"),
+    ))
 
     video_id = youtube_service.upload_video(
         video_path, title, description, tags, status
