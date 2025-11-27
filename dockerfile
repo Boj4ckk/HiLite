@@ -49,8 +49,8 @@ RUN pytest
 FROM builder as prod
 
 RUN groupadd -g 1001 appuser && \
-    useradd -r -u 1001 -g appuser appuser && \
-    chown -R appuser:appuser /home/appuser
+    useradd -r -u 1001 -g appuser appuser
+
 
 
 WORKDIR /app
