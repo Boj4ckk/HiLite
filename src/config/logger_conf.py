@@ -4,6 +4,12 @@ import logging.handlers
 
 def setup_logger():
     logger = logging.getLogger("HiLiteLogger")
+
+    # If logger already has handlers, assume it's configured and return it
+    if logger.handlers:
+        logger.propagate = False
+        return logger
+
     logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
