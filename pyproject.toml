@@ -16,6 +16,7 @@ dependencies = [
     "pysrt>=1.1.2",
     "elevenlabs>=2.23.0",
     "pydantic-settings>=2.12.0",
+    "supabase>=2.24.0",
 
 ]
 
