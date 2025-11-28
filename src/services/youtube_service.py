@@ -7,7 +7,6 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.http import MediaFileUpload
 
-from config.path_config import BASE_DIR
 from config.settings import settings
 
 logger = logging.getLogger("HiLiteLogger")
@@ -42,17 +41,8 @@ class YoutubeService:
         self.scopes = scopes or settings.SCOPES
         self.api_service_name = api_service_name or settings.API_SERVICE_NAME
         self.api_version = api_version or settings.API_VERSION
-
-        # Token file path
-        token_path = settings.YT_TOKEN_PATH
-        if not token_path:
-            raise ValueError("YT_TOKEN_PATH environment variable not set")
-
-        self.token = os.path.join(BASE_DIR, token_path)
-
-        token_dir = os.path.dirname(self.token)  # dir of the file
-        os.makedirs(token_dir, exist_ok=True)
-        logger.info(f"Token will be saved to {self.token}")
+        self.client_secret = client_secret
+        self.port = port
 
         # Validate required parameters
         if not client_secret:
@@ -66,126 +56,103 @@ class YoutubeService:
         if not os.path.exists(client_secret):
             raise FileNotFoundError(f"Client secret file not found: {client_secret}")
 
-        self.client_secret = client_secret
-        self.port = port
+        logger.info("Youtube service configuration loaded")
 
-        try:
-            logger.info("Initializing YouTube service...")
-            # Start OAuth2 flow get credentials and build the YouTube API client
-            credentials = self._get_credentials()
-
-            # Create youtube client
-            self.youtube_client = googleapiclient.discovery.build(
-                self.api_service_name, self.api_version, credentials=credentials
-            )
-            logger.info("YouTube service initialized successfully")
-
-        except FileNotFoundError:
-            raise
-        except ValueError:
-            raise
-        except Exception as e:
-            logger.error(f"Error while initializing YouTube service: {e}")
-            raise Exception(f"Failed to initialize YouTube service: {e}") from e
-
-    def _get_credentials(self):
+    def get_client(
+        self, access_token, refresh_token=None
+    ):  # return list youtube client , credentials
         """
-        Get valid credentials, refreshing or requesting new auth if needed.
+        Create an authenticated YouTube client using the provided tokens.
+        Automatically refreshes the token if it is expired.
+
+        Args:
+        access_token: OAuth2 access token
+        refresh_token: Refresh token (optional)
 
         Returns:
-            Credentials: Valid OAuth2 credentials with refresh token
+        tuple: (youtube_client, credentials)
+        - youtube_client: Authenticated YouTube API client
+        - credentials: Credentials object (possibly refreshed)
 
         Raises:
-            Exception: If authentication fails
+        Exception: If creating the client fails
         """
-        credentials = None
 
-        # Load existing credentials if available
-        if os.path.exists(self.token):
-            try:
-                credentials = Credentials.from_authorized_user_file(
-                    self.token, self.scopes.split(",")
-                )
-                logger.info("Loaded existing credntials from token file")
-            except Exception as e:
-                logger.warning(f"Failed to load credentials: {e}")
+        try:
+            credentials = Credentials(
+                token=access_token,
+                refresh_token=refresh_token,
+                token_uri="https://oauth2.googleapis.com/token",
+                client_id=settings.CLIENT_ID,
+                client_secret=self.client_secret,
+                scopes=self.scopes.split(","),
+            )
 
-        # Refresh if token is expired but refresh token is available
-        if credentials and credentials.expired and credentials.refresh_token:
-            try:
+            # Refresh if expired and refresh available
+            if credentials.expired and credentials.refresh_token:
                 logger.info("Token expired, refreshing...")
-                credentials.refresh(Request())  # Refresh token
-
-                # Save refreshed token
-                with open(self.token, "w") as f:
-                    f.write(credentials.to_json())
+                credentials.refresh(Request())
                 logger.info("Token refreshed successfully")
 
-                return credentials
-            except Exception as e:
-                logger.error(f"Failed to refresh token: {e}")
-                credentials = None
+            youtube_client = googleapiclient.discovery.build(
+                self.api_service_name, self.api_version, credentials=credentials
+            )
 
-        # Need fisrt/new auth
-        if not credentials or not credentials.valid:
-            logger.info("Starting OAuth2 flow for new credentials...")
+            return youtube_client, credentials
+
+        except Exception as e:
+            logger.error(f"Failed to create YouTube client: {e}")
+            raise
+
+    def authentificate_new_user(self):
+        try:
+            logger.info("Starting Oauth2 flow for new user...")
+
+            flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+                self.client_secret,
+                self.scopes.split(","),
+            )
+            flow.oauth2session.redirect_uri = f"http://localhost:{self.port}/"
+            auth_url, _ = flow.authorization_url(
+                access_type="offline", prompt="consent", include_granted_scopes="true"
+            )
 
             try:
-                flow = (
-                    google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-                        self.client_secret,
-                        self.scopes.split(","),
-                    )
-                )
-                flow.oauth2session.redirect_uri = f"http://localhost:/{self.port}/"
-
-                auth_url, _ = flow.authorization_url(
-                    access_type="offline",
-                    prompt="consent",
-                    include_granted_scopes="true",
-                )
-
-                logger.info("Opening brower for authorization")
-
-                # Starting local server
-                try:
+                credentials = flow.run_local_server(port=self.port, open_browser=True)
+            except OSError as e:
+                if (
+                    "Address already in use" in str(e)
+                    or "WinError 10048" in str(e)
+                    or "WinError 10013" in str(e)
+                ):
+                    logger.warning(f"Port {self.port} occupied, trying {self.port + 1}")
                     credentials = flow.run_local_server(
-                        port=self.port, open_browser=True
-                    )
-                except OSError as e:
-                    if (
-                        "Adress already is use" in str(e)
-                        or "WinError 10048" in (e)
-                        or "WinErro 10013 in" in (e)
-                    ):
-                        logger.warning(
-                            f"Port {self.port} is occupied, tryping port {self.port + 1}"
-                        )
-                        credentials = flow.run_local_server(
-                            port=self.port + 1, open_browser=True
-                        )
-                    else:
-                        raise
-
-                if not credentials.refresh_token:
-                    logger.warning(
-                        "       No refresh_token received! This can happen if:\n"
-                        "   1. User already authorized this app before\n"
-                        "   2. Previous token still exists\n"
-                        "   Solution: Revoke access at https://myaccount.google.com/permissions\n"
-                        "   Then delete token.json and try again."
+                        port=self.port + 1, open_browser=True
                     )
                 else:
-                    logger.info("Refresh token obtained successfully")
+                    raise
 
-                with open(self.token, "w") as f:
-                    f.write(credentials.to_json())
-                logger.info(f"Credentials saved to {self.token}")
-            except Exception as e:
-                logger.error(f"OAuth flow failed: {e}")
-        return credentials
+            if not credentials.refresh_token:
+                logger.error(
+                    "No refresh_token received! This can happen if:\n"
+                    "   1. User already authorized this app before\n"
+                    "   2. Previous token still exists\n"
+                    "   Solution: Revoke access at https://myaccount.google.com/permissions"
+                )
+                raise ValueError("No refresh token received from Google OAuth")
 
-    def upload_video(self, file, title, description, tags, status):
+            logger.info("Authentication successful, tokens received")
+
+            return {
+                "access_token": credentials.token,
+                "refresh_token": credentials.refresh_token,
+            }
+
+        except Exception as e:
+            logger.error(f"OAuth flow failed: {e}")
+            raise
+
+    def upload_video(self, youtube_client, file, title, description, tags, status):
         """
         Upload a video to YouTube.
 
@@ -213,7 +180,16 @@ class YoutubeService:
             media = MediaFileUpload(
                 file, chunksize=-1, resumable=True, mimetype="video/mp4"
             )
-            request = self.youtube_client.videos().insert(
+            # The youtube client resource should expose `videos().insert(...)`
+            # when created with `googleapiclient.discovery.build(...)`.
+            try:
+                videos_resource = youtube_client.videos()
+            except Exception:
+                raise TypeError(
+                    "youtube_client does not appear to be a valid YouTube resource"
+                )
+
+            request = videos_resource.insert(
                 part="snippet,status",
                 body={
                     "snippet": {
