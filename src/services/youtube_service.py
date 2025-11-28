@@ -152,7 +152,7 @@ class YoutubeService:
             logger.error(f"OAuth flow failed: {e}")
             raise
 
-    def upload_video(self, youtube_client, file, title, description, tags, status):
+    def upload_video(self, youtube_client, file, title, description, tags, pusblish_at):
         """
         Upload a video to YouTube.
 
@@ -174,8 +174,7 @@ class YoutubeService:
             raise FileNotFoundError(f"Video file not found: {file}")
 
         try:
-            logger.info(f"Starting upload of video: {file}")
-            logger.info(f"Title: {title}, Status: {status}")
+            logger.info(f"Sheduling the upload of video: {file}")
 
             media = MediaFileUpload(
                 file, chunksize=-1, resumable=True, mimetype="video/mp4"
@@ -197,7 +196,7 @@ class YoutubeService:
                         "description": description,
                         "tags": tags,
                     },
-                    "status": {"privacyStatus": status},
+                    "status": {"privacyStatus": "private", "publishAt": pusblish_at},
                 },
                 media_body=media,
             )
@@ -209,11 +208,11 @@ class YoutubeService:
                 raise ValueError("Invalid upload response from YouTube")
 
             video_id = response["id"]
-            logger.info(f"Video uploaded successfully. Video ID: {video_id}")
+            logger.info(f"Video: {video_id} will be uploaded at {pusblish_at}. ")
             return video_id
 
         except FileNotFoundError:
             raise
         except Exception as e:
-            logger.error(f"Failed to upload video: {e}")
-            raise Exception(f"YouTube upload failed: {e}") from e
+            logger.error(f"Failed to shedule the upload: {e}")
+            raise Exception(f"YouTube shedule upload failed: {e}") from e
