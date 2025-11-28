@@ -16,6 +16,8 @@ class Settings(BaseSettings):
 
     ELEVENLABS_API_KEY: str = "test_elevenlabs_key"
 
+    SUPABASE_API_KEY: str = "test_supabase_key"
+    SUPABASE_URL: str = "test_password"
     # ============= Buisness Conf =============
     # Twitch
     BASE_URL: str = "https://api.twitch.tv/helix"
