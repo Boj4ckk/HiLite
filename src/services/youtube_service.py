@@ -42,7 +42,7 @@ class YoutubeService:
         self.api_service_name = api_service_name or settings.API_SERVICE_NAME
         self.api_version = api_version or settings.API_VERSION
         self.client_secret = client_secret
-        self.port = port
+        self.port = settings.YOUTUBE_SERVER_PORT
 
         # Validate required parameters
         if not client_secret:
@@ -82,7 +82,7 @@ class YoutubeService:
             credentials = Credentials(
                 token=access_token,
                 refresh_token=refresh_token,
-                token_uri="https://oauth2.googleapis.com/token",
+                token_uri=settings.YOUTUBE_TOKEN_URI,
                 client_id=settings.CLIENT_ID,
                 client_secret=self.client_secret,
                 scopes=self.scopes.split(","),
@@ -112,7 +112,7 @@ class YoutubeService:
                 self.client_secret,
                 self.scopes.split(","),
             )
-            flow.oauth2session.redirect_uri = f"http://localhost:{self.port}/"
+            flow.oauth2session.redirect_uri = settings.YOUTUBE_REDIRECT_URI
             auth_url, _ = flow.authorization_url(
                 access_type="offline", prompt="consent", include_granted_scopes="true"
             )
