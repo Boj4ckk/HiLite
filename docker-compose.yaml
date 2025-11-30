@@ -1,49 +1,30 @@
-
+version: "3.8"
 services:
   test:
     build:
-      context: .
+      context: ./backend
       target: test
     image: hilite:test
     command: echo "Tests completed"
 
 
 
-  app:
-    build:
-      context: .
-      target: prod
-    image: hilite:prod
-    container_name: hilite-app
-    depends_on:
-      test:
-        condition: service_completed_successfully
-    volumes:
-      - ./data:/app/data
-      - ./assets:/app/assets
-      - ./tmp:/app/tmp
-    environment:
-      - CLIENT_SECRET_FILE=${YOUTUBE_CLIENT_SECRET_FILE}
-      - CLIENT_ID=${YOUTUBE_CLIENT_ID}
-      - YT_TOKEN=${YOUTUBE_CREDENTIAL_TOKEN}
-      - TWITCH_CLIENT_ID=${TWITCH_CLIENT_ID}
-      - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
-      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
-    shm_size: '2gb'
-  
-
   dev:
     build:
-      context: .
+      context: ./backend
       target: prod
+    ports:
+      - "8000:8000"
     image: hilite:prod
     container_name: hilite-dev-app
     depends_on:
       test:
         condition: service_completed_successfully
+    env_file:
+      - .env
     volumes:
-      - ./src:/app/src
-      - ./secrets:/etc/secrets
+      - ./backend/src:/app/backend/src
+      - ./backend/secrets:/etc/secrets
     environment:
       - CLIENT_ID=${CLIENT_ID}
       - CLIENT_SECRET_FILE=${CLIENT_SECRET_FILE}
@@ -53,5 +34,22 @@ services:
       - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_API_KEY=${SUPABASE_API_KEY}
+
     shm_size: '2gb'
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    image: hilite-frontend:latest
+    container_name: hilite-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - dev
+    # Optionnel pour développement local (décommenter si vous voulez monter le dossier frontend):
+    # volumes:
+    #   - ./frontend:/usr/share/nginx/html
+
+
 
