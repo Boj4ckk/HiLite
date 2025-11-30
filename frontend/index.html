@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch OAuth App</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Section Login (non connecté) -->
+        <div id="loginSection" class="card">
+            <h1>🎮 Authentification Twitch</h1>
+            <p>Connectez-vous avec votre compte Twitch pour accéder à l'application.</p>
+            <button onclick="auth.login()" class="btn-primary">
+                Se connecter avec Twitch
+            </button>
+            <div id="loginStatus" class="status-message"></div>
+        </div>
+
+        <!-- Section Dashboard (connecté) -->
+        <div id="dashboardSection" class="card hidden">
+            <div class="navbar">
+                <h1>👤 Profil</h1>
+                <button onclick="auth.logout()" class="btn-secondary">
+                    🚪 Déconnexion
+                </button>
+            </div>
+
+            <div class="user-info">
+                <h2>Informations utilisateur</h2>
+                <div class="info-row">
+                    <strong>Email:</strong>
+                    <span id="userEmail">-</span>
+                </div>
+                <div class="info-row">
+                    <strong>ID:</strong>
+                    <span id="userId">-</span>
+                </div>
+                <div class="info-row">
+                    <strong>Provider:</strong>
+                    <span id="userProvider">-</span>
+                </div>
+                <div class="info-row">
+                    <strong>Nom d'utilisateur:</strong>
+                    <span id="username">-</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button onclick="api.callBackend()" class="btn-primary">
+                    📡 Appeler l'API Backend
+                </button>
+                <button onclick="api.getUserProfile()" class="btn-primary">
+                    👤 Récupérer mon profil
+                </button>
+            </div>
+
+            <div id="apiResponse" class="api-response hidden">
+                <h3>Réponse de l'API:</h3>
+                <pre id="apiData"></pre>
+            </div>
+
+            <div id="statusMessages"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
