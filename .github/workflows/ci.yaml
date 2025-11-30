@@ -61,7 +61,7 @@ jobs:
           file: ./frontend/dockerfile
 
   deploy:
-    needs: [build-backend]
+    needs: [build-backend,build-frontend]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -72,4 +72,12 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{}' \
             https://api.render.com/deploy/srv-XXXXXXXX/deploys
+    
+      - name: Deploy frontend to Render
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            https://api.render.com/deploy/${{ secrets.RENDER_FRONTEND_SERVICE_ID }}/deploys
 
