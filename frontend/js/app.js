@@ -10,7 +10,7 @@ const auth = {
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'twitch',
                 options: {
-                    redirectTo: window.location.origin
+                    redirectTo: CONFIG.FRONTEND_URL
                 }
             })
 
