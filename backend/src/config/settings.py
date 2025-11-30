@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_URL: str = "http://localhost:8000"
 
-    CORS_ALLOWED_ORIGINS: list = ["http://localhost:80", "http://localhost"]
+    CORS_ALLOWED_ORIGINS: str = "http://localhost:80"
 
     class Config:
         env_file = ".env"
