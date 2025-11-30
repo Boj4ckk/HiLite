@@ -2,7 +2,8 @@
 const CONFIG = {
     SUPABASE_URL: 'https://axbfethbutbrorjzwbgk.supabase.co',
     SUPABASE_ANON_KEY: 'sb_publishable_SeIwANjVYHYY5xUhMa_JGw_BA7rmQJ1',
-    BACKEND_URL: 'http://localhost:8000'
+    BACKEND_URL: 'https://hilite-7hl5.onrender.com',
+    FRONTEND_URL: 'https://hilite-frontend.onrender.com'
 }
 
 // Vérification de la config
