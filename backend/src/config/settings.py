@@ -24,15 +24,29 @@ class Settings(BaseSettings):
     TWITCH_CLIP_FOLDER_PATH: str = "data/twitch_clips"
     TWITCH_CLIP_BLACKLIST_PATH: str = "data/clip_blacklist.csv"
 
+    TWITCH_OAUTH2_URL: str = "https://id.twitch.tv/oauth2/authorize"
+    TWITCH_TOKEN_URI: str = "https://id.twitch.tv/oauth2/token"
+    TWITCH_SCOPES: str = "user:read:email+clips:edit"
+    TWITCH_CALLBACK_URL: str = "http://localhost:8000/auth/callback/twitch"
+
     # Youtube
     SCOPES: str = "https://www.googleapis.com/auth/youtube.upload"
     API_SERVICE_NAME: str = "youtube"
     API_VERSION: str = "v3"
 
+    YOUTUBE_TOKEN_URI: str = "https://oauth2.googleapis.com/token"
+    YOUTUBE_SERVER_PORT: str = "8081"
+    YOUTUBE_REDIRECT_URI: str = f"http://localhost:{YOUTUBE_SERVER_PORT}/"
+
     # Edit
     TITLES_TEMPLATE_PATH: str = "data/titles_template.json"
     SRT_DIR_PATH: str = "tmp/srt"
     EDITED_CLIP_FOLDER: str = "data/edited_clips"
+
+    # CORS
+    BACKEND_URL: str = "http://localhost:8000"
+
+    CORS_ALLOWED_ORIGINS: list = ["http://localhost:80", "http://localhost"]
 
     class Config:
         env_file = ".env"

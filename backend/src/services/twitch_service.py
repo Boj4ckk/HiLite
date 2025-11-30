@@ -23,6 +23,7 @@ class TwitchApi:
         self.BASE_URL = settings.BASE_URL
         self.client_id = client_id
         self.client_secret = client_secret
+        self.scopes = settings.TWITCH_SCOPES
         self.accessToken = self.authenticate()
         self.headers = {
             "Client-Id": self.client_id,
@@ -36,7 +37,7 @@ class TwitchApi:
         :return: Access token as a string.
         :raises: Exception for authentication failures
         """
-        url = "https://id.twitch.tv/oauth2/token"
+        url = settings.TWITCH_TOKEN_URI
         payload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
