@@ -1,11 +1,11 @@
 from fastapi import Depends, Header, HTTPException
 
 from buisness.db.user_business import UserBusiness
+from config.logger_conf import setup_logger
 from config.settings import settings
 from repositories.user_repository import UserRepository
 from services.supabase_service import SupaBase
 from services.twitch_service import TwitchApi
-from config.logger_conf import setup_logger
 
 logger = setup_logger()
 
@@ -44,5 +44,5 @@ async def get_current_user(
 
     token = authorization.replace("Bearer ", "").strip()
     db_user = user_business.sync_user(token)
-    
+
     return {"user": db_user}
