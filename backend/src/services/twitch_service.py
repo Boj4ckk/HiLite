@@ -94,6 +94,18 @@ class TwitchApi:
             "Authorization": f"Bearer {token}",
         }
 
+
+    def check_twitch_scopes(self,user_token):
+        
+        url = "https://id.twitch.tv/oauth2/validate"
+        header = {"Authorization" : f"OAuth {user_token}"}
+        response = requests.get(
+            url,
+            headers=header
+        )
+        return response
+
+
     def get_broadcaster_id(self, username):
         """
         Fetch the user ID for a given Twitch username.
@@ -164,6 +176,48 @@ class TwitchApi:
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to fetch clips for broadcaster {brodcaster_id}: {e}")
             return []
+
+
+
+    def download_broadcaster_clips(self, editor_id, broadcaster_id, clip_id, user_token):
+        """
+        Download clips for a broadcaster.
+        
+        :param editor_id: Editor ID
+        :param broadcaster_id: Broadcaster ID  
+        :param clip_id: Clip ID
+        :return: List of clips
+        """
+        try:
+            url = f"{self.BASE_URL}/clips"
+            params = {
+                "editor_id": editor_id,
+                "broadcaster_id": broadcaster_id,
+                "clip_id": clip_id
+            }
+
+            logger.info(f"Downloading clip {clip_id} for broadcaster {broadcaster_id}")
+
+            response = requests.get(
+                url,
+                headers={
+                    "Client-Id": self.client_id,
+                    "Authorization": f"Bearer {user_token}",
+                },
+                params=params,
+                timeout=10
+            )
+
+            response.raise_for_status()
+            clips = response.json().get("data", [])
+            logger.info(f"Retrieved {len(clips)} clips for broadcaster {broadcaster_id}")
+            return clips
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to download clips for broadcaster {broadcaster_id}: {e}")
+            return []
+        
+
+    
 
     def get_game_info(self, game_id):
         """
