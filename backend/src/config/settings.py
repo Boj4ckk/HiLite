@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     TWITCH_CLIP_FOLDER_PATH: str = "data/twitch_clips"
     TWITCH_CLIP_BLACKLIST_PATH: str = "data/clip_blacklist.csv"
 
+    TWITCH_OAUTH2_VALIDATE: str = "https://id.twitch.tv/oauth2/validate"
     TWITCH_OAUTH2_URL: str = "https://id.twitch.tv/oauth2/authorize"
     TWITCH_TOKEN_URI: str = "https://id.twitch.tv/oauth2/token"
     TWITCH_SCOPES: str = "user:read:email+clips:edit"
