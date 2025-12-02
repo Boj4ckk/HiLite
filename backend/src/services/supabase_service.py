@@ -51,7 +51,23 @@ class SupaBase:
         except Exception as e:
             logger.error("Error in get_user_from_token: %s", e)
             return None
+    
+    def get_row_by_id(self, column, id_value, table):
+        try:
+            logger.info(f"Geting {table} {column} Where {column} = {id_value}")
+            response = (
+                self.client
+                .table(table)
+                .select("*")
+                .eq(column, id_value)
+                .single()
+                .execute()
+            )
+            return response
+        except Exception as e:
+            logger.error(f"Failed to get {table} {column} where {column} == {id_value}")
 
+            
     def upsert(self, table_name, data, on_conflict: str = None):
         """
         Create or update table
@@ -79,3 +95,17 @@ class SupaBase:
         except Exception as e:
             logger.error(f"Failed to upsert into table {table_name}: %s", e)
         return response
+
+    def insert(self,table_name,data):
+        try:
+            logger.info(f"Inserting into table {table_name}")
+            response = (
+                self.supabase.table(table_name)
+                .insert(data)
+                .execute()
+            )
+            logger.info(f"Successfully inserted into {table_name}")
+            return response
+        except Exception as e:
+            logger.error(f"Failed to insert into table {table_name}")
+
