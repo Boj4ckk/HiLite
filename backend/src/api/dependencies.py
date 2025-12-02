@@ -5,6 +5,9 @@ from config.settings import settings
 from repositories.user_repository import UserRepository
 from services.supabase_service import SupaBase
 from services.twitch_service import TwitchApi
+from config.logger_conf import setup_logger
+
+logger = setup_logger()
 
 
 def get_supabase_service() -> SupaBase:
@@ -31,24 +34,15 @@ def get_user_business(
     user_buisness = UserBusiness(supabase, user_repository)
     return user_buisness
 
-async def get_user_token(
-        authorization: str = Header(None)
+
+async def get_current_user(
+    authorization: str = Header(None),
+    user_business: UserBusiness = Depends(get_user_business),
 ):
     if authorization is None:
         raise HTTPException(status_code=401, detail="Missing auth header")
-    token = authorization.replace("Bearer", "").strip()
 
-    return {"token" : token}
-
-
-async def get_current_user(
-    user_token: dict = Depends(get_user_token),
-    user_business: UserBusiness = Depends(get_user_business),
-):
-    token = user_token.get("token")
+    token = authorization.replace("Bearer ", "").strip()
     db_user = user_business.sync_user(token)
-
-    return {
-        "user": db_user
-    }
-
+    
+    return {"user": db_user}
