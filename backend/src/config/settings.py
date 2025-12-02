@@ -9,7 +9,9 @@ class Settings(BaseSettings):
     # ============= SECRETS =============
     TWITCH_CLIENT_ID: str = "test_twitch_client_id"
     TWITCH_CLIENT_SECRET: str = "test_twitch_secret"
-    TWITCH_EVENTSUB_SECRET: str = "c5b83f91d1d8e910ac8698abfae45d2388a6dfef2b2f3d0dce8cb85a3edfb0a1"
+    TWITCH_EVENTSUB_SECRET: str = (
+        "c5b83f91d1d8e910ac8698abfae45d2388a6dfef2b2f3d0dce8cb85a3edfb0a1"
+    )
 
     CLIENT_ID: str = "test_youtube_client_id"
     CLIENT_SECRET_FILE: str = "tests/fixtures/client_secret.json"
@@ -50,7 +52,11 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_URL: str = "http://localhost:8000"
 
-    CORS_ALLOWED_ORIGINS: list = ["http://localhost:80", "http://localhost:5000","http://localhost:5173"]
+    CORS_ALLOWED_ORIGINS: list = [
+        "http://localhost:80",
+        "http://localhost:5000",
+        "http://localhost:5173",
+    ]
 
     class Config:
         env_file = ".env"
