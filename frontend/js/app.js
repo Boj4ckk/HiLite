@@ -41,6 +41,48 @@ const auth = {
     }
 }
 
+
+const twitchTokens = {
+    // Sauvegarder les tokens Twitch dans le backend
+    async saveToBackend(session) {
+        if (!session?.provider_token) {
+            console.warn('Pas de provider_token disponible')
+            return false
+        }
+
+        try {
+            showStatus('Sauvegarde des tokens Twitch...', 'info')
+            
+            const response = await fetch(`${CONFIG.BACKEND_URL}/auth/twitch/tokens`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`, // JWT Supabase
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    twitch_access_token: session.provider_token,
+                    twitch_refresh_token: session.provider_refresh_token
+                })
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Erreur sauvegarde tokens')
+            }
+
+            console.log('Tokens Twitch sauvegardés')
+            showStatus('Tokens Twitch sauvegardés', 'success')
+            return true
+            
+        } catch (error) {
+            console.error('Erreur sauvegarde tokens:', error)
+            showStatus(`Erreur: ${error.message}`, 'error')
+            return false
+        }
+    }
+}
+
 // ============================================
 // APPELS API BACKEND
 // ============================================
@@ -56,13 +98,7 @@ const api = {
                 throw new Error('Pas de session active')
             }
 
-            const response = await fetch(`${CONFIG.BACKEND_URL}/auth/me`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${session.access_token}`,
-                    'Content-Type': 'application/json'
-                }
-            })
+            await twitchTokens.saveToBackend(session)
 
             const data = await response.json()
 
@@ -159,7 +195,7 @@ function displayAPIResponse(data) {
 // ============================================
 // ÉCOUTE DES ÉVÉNEMENTS D'AUTHENTIFICATION
 // ============================================
-supabase.auth.onAuthStateChange((event, session) => {
+supabase.auth.onAuthStateChange(async (event, session) => {
     console.log('Auth event:', event)
     
     if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
@@ -168,6 +204,7 @@ supabase.auth.onAuthStateChange((event, session) => {
             showDashboardSection(session.user)
             
             if (event === 'SIGNED_IN') {
+                await twitchTokens.saveToBackend(session)
                 showStatus('✅ Connexion réussie !', 'success')
             }
         } else {
