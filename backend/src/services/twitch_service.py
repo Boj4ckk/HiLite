@@ -95,15 +95,42 @@ class TwitchApi:
         }
 
 
-    def check_twitch_scopes(self,user_token):
-        
-        url = "https://id.twitch.tv/oauth2/validate"
-        header = {"Authorization" : f"OAuth {user_token}"}
-        response = requests.get(
-            url,
-            headers=header
-        )
-        return response
+    def is_token_valid(self,access_token):
+        """
+        Verify if the access token is still valid and return it's data
+            Args:
+                - OAuth user access token
+            Return:
+               - {'valid': bool, 'expires_in': int, 'scopes': list}
+        """
+        url = settings.TWITCH_OAUTH2_VALIDATE
+        try:
+
+            header = {"Authorization" : f"OAuth {access_token}"}
+            response = requests.get(
+                url,
+                headers=header
+            )
+            
+            if response.code == 200:
+                data = response.json()
+                return {
+                    'valid': True,
+                    'expires_in': data['expires_in'],
+                    'scopes' : data['scopes'],
+                    'user_id' : data['user_id'],
+                    'client_id' : data['client_id']
+                }
+            else:
+                return {
+                    'valid': False,
+                    'expires_in' : 0
+                }
+            
+
+        except Exception as e:
+            logger.info(f"Error validation token , the access token may be expired : {e}")
+
 
 
     def get_broadcaster_id(self, username):
@@ -189,11 +216,11 @@ class TwitchApi:
         :return: List of clips
         """
         try:
-            url = f"{self.BASE_URL}/clips"
+            url = f"{self.BASE_URL}/clips/downloads"
             params = {
-                "editor_id": editor_id,
                 "broadcaster_id": broadcaster_id,
-                "clip_id": clip_id
+                "editor_id": editor_id,
+                "clip_id": str(clip_id)
             }
 
             logger.info(f"Downloading clip {clip_id} for broadcaster {broadcaster_id}")
@@ -248,18 +275,3 @@ class TwitchApi:
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to fetch game info for game_id {game_id}: {e}")
             return None
-
-    def download_clips(self, broadcaster_id, clip_id, editor_id=""):
-        url = f"{self.BASE_URL}/clips/downloads"
-        params = {
-            "broadcaster_id": broadcaster_id,
-            "editor_id": editor_id,
-            "clip_id": clip_id,
-        }
-        response = requests.get(url, headers=self.headers, params=params)
-        if response.status_code == 200:
-            return response.json().get("data", [])
-        logging.error(
-            f"Failed to Download clip : {clip_id} for broadcaster {broadcaster_id}: {response.text}"
-        )
-        return []
