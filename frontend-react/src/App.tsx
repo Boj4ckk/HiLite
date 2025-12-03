@@ -17,7 +17,7 @@ function App() {
     try {
       console.log('🔑 Envoi des tokens au backend...')
       
-      const response = await fetch('http://localhost:8000/auth/twitch/tokens', {
+      const response = await fetch('http://localhost:8000/auth/me', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -27,6 +27,8 @@ function App() {
           twitch_access_token: session.provider_token,
           twitch_refresh_token: session.provider_refresh_token
         })
+
+       
       })
 
       const data = await response.json()
@@ -76,6 +78,9 @@ function App() {
         scopes: 'channel:manage:clips editor:manage:clips'
       }
     })
+
+    
+    
   }
 
   // 🔥 Logout
@@ -87,25 +92,25 @@ function App() {
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'system-ui' }}>
-      <h1>🧪 Test Auth Twitch</h1>
+      <h1>Test Auth Twitch</h1>
 
       {!user ? (
         <div>
           <p>Pas connecté</p>
           <button onClick={login} style={{ padding: '10px 20px', fontSize: '16px' }}>
-            🎮 Se connecter avec Twitch
+            Se connecter avec Twitch
           </button>
         </div>
       ) : (
         <div>
-          <h2>✅ Connecté !</h2>
+          <h2> Connecté !</h2>
           <p><strong>Username:</strong> {user.user_metadata?.preferred_username}</p>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>User ID:</strong> {user.id}</p>
           
           <hr />
           
-          <h3>🔍 Debug Session</h3>
+          <h3>Debug Session</h3>
           <pre style={{ background: '#f5f5f5', padding: '10px', overflow: 'auto' }}>
             {JSON.stringify({
               has_provider_token: !!session?.provider_token,
