@@ -92,6 +92,25 @@ class TwitchApi:
             "Authorization": f"Bearer {token}",
         }
 
+    async def refresh_access_token(self, refresh_token):
+        try:
+            logger.info("Refreshing user access token")
+            data = {
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+            }
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    settings.TWITCH_TOKEN_URI, data=data, time_out=10
+                )
+                response.raise_for_status()
+                logger.info("Refreshed user access token successfully")
+                return response.json()
+        except Exception as e:
+            logger.info(f"Failed to refresh user access token : {e}")
+
     def is_token_valid(self, access_token):
         """
         Verify if the access token is still valid and return it's data
@@ -105,17 +124,12 @@ class TwitchApi:
             header = {"Authorization": f"OAuth {access_token}"}
             response = requests.get(url, headers=header)
 
-            if response.code == 200:
-                data = response.json()
-                return {
-                    "valid": True,
-                    "expires_in": data["expires_in"],
-                    "scopes": data["scopes"],
-                    "user_id": data["user_id"],
-                    "client_id": data["client_id"],
-                }
-            else:
+            if response.status_code == 401:
+                logger.info("The user access token is expired")
                 return {"valid": False, "expires_in": 0}
+
+            data = response.json()
+            return {"valid": True, "expires_in": data.get("expires_in")}
 
         except Exception as e:
             logger.info(
