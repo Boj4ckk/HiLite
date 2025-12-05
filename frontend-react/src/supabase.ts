@@ -7,7 +7,7 @@ console.log('🔍 VITE_SUPABASE_API_KEY:', import.meta.env.VITE_SUPABASE_API_KEY
 console.log('🔍 Toutes les env:', import.meta.env)
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseKey = import.meta.env.VITE_SUPABASE_API_KEY
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUB_API_KEY
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Variables manquantes!')
