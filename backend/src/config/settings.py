@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     # ============= SECRETS =============
     TWITCH_CLIENT_ID: str = "test_twitch_client_id"
     TWITCH_CLIENT_SECRET: str = "test_twitch_secret"
+    TWITCH_EVENTSUB_SECRET: str = (
+        "c5b83f91d1d8e910ac8698abfae45d2388a6dfef2b2f3d0dce8cb85a3edfb0a1"
+    )
 
     CLIENT_ID: str = "test_youtube_client_id"
     CLIENT_SECRET_FILE: str = "tests/fixtures/client_secret.json"
@@ -24,10 +27,13 @@ class Settings(BaseSettings):
     TWITCH_CLIP_FOLDER_PATH: str = "data/twitch_clips"
     TWITCH_CLIP_BLACKLIST_PATH: str = "data/clip_blacklist.csv"
 
+    TWITCH_OAUTH2_VALIDATE: str = "https://id.twitch.tv/oauth2/validate"
     TWITCH_OAUTH2_URL: str = "https://id.twitch.tv/oauth2/authorize"
     TWITCH_TOKEN_URI: str = "https://id.twitch.tv/oauth2/token"
     TWITCH_SCOPES: str = "user:read:email+clips:edit"
     TWITCH_CALLBACK_URL: str = "http://localhost:8000/auth/callback/twitch"
+
+    TWITCH_EVENTSUB_URL: str = "https://api.twitch.tv/helix/eventsub/subscriptions"
 
     # Youtube
     SCOPES: str = "https://www.googleapis.com/auth/youtube.upload"
@@ -46,7 +52,11 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_URL: str = "http://localhost:8000"
 
-    CORS_ALLOWED_ORIGINS: str = "http://localhost:80"
+    CORS_ALLOWED_ORIGINS: list = [
+        "http://localhost:80",
+        "http://localhost:5000",
+        "http://localhost:5173",
+    ]
 
     class Config:
         env_file = ".env"

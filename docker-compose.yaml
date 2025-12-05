@@ -20,8 +20,7 @@ services:
     depends_on:
       test:
         condition: service_completed_successfully
-    env_file:
-      - .env
+
     volumes:
       - ./backend/src:/app/backend/src
       - ./backend/secrets:/etc/secrets
@@ -36,20 +35,39 @@ services:
       - SUPABASE_API_KEY=${SUPABASE_API_KEY}
 
     shm_size: '2gb'
+    profiles: ["dev"]
 
-  frontend:
+
+
+  frontend-dev:
     build:
-      context: ./frontend
-      dockerfile: dockerfile
-    image: hilite-frontend:latest
-    container_name: hilite-frontend
+      context: ./frontend-react
+      dockerfile: dockerfile.dev 
+    ports:
+      - "5173:5173"
+    environment:
+    - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+    - VITE_SUPABASE_API_KEY=${VITE_SUPABASE_API_KEY}
+    volumes:
+    - ./frontend-react/src:/app/src
+    - ./frontend-react/public:/app/public
+    - ./frontend-react/index.html:/app/index.html
+    - ./frontend-react/vite.config.ts:/app/vite.config.ts
+    - /app/node_modules
+    profiles: ["dev"]
+
+
+  frontend-prod:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile  
     ports:
       - "80:80"
-    depends_on:
-      - dev
-    # Optionnel pour développement local (décommenter si vous voulez monter le dossier frontend):
-    # volumes:
-    #   - ./frontend:/usr/share/nginx/html
+    profiles: ["prod"]
+
+
+
+
 
 
 

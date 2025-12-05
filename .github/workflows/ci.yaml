@@ -16,6 +16,8 @@ jobs:
       TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
       TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
       YT_TOKEN_PATH: ${{ secrets.YT_TOKEN_PATH }}
+      SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY}}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL}}
 
 
 
@@ -57,11 +59,11 @@ jobs:
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with: 
-          context: ./frontend
-          file: ./frontend/dockerfile
+          context: ./frontend-react
+          file: ./frontend-react/dockerfile
 
-  deploy:
-    needs: [build-backend,build-frontend]
+  deploy-backend:
+    needs: build-backend
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -71,13 +73,17 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{}' \
-            https://api.render.com/deploy/srv-XXXXXXXX/deploys
-    
+            https://api.render.com/deploy/${{ secrets.RENDER_BACKEND_DEPLOY_HOOK}}
+
+  deploy-frontend:
+    needs: build-frontend
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy frontend to Render
         run: |
           curl -X POST \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{}' \
-            https://api.render.com/deploy/${{ secrets.RENDER_FRONTEND_SERVICE_ID }}/deploys
-
+            https://api.render.com/deploy/${{ secrets.RENDER_FRONT_DEPLOY_HOOK }}

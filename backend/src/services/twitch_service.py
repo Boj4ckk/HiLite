@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta, timezone
 
+import httpx
 import requests
 
 from config.settings import settings
@@ -24,18 +25,24 @@ class TwitchApi:
         self.client_id = client_id
         self.client_secret = client_secret
         self.scopes = settings.TWITCH_SCOPES
-        self.accessToken = self.authenticate()
-        self.headers = {
-            "Client-Id": self.client_id,
-            "Authorization": f"Bearer {self.accessToken}",
-        }
 
-    def authenticate(self):
+        # Token management
+        self._access_token = None
+        self._token_expiry = None
+
+    async def get_access_token(self) -> str:
         """
-        Authenticate and get an app access token.
+        Get valid access token, refreshing if necessary.
 
-        :return: Access token as a string.
-        :raises: Exception for authentication failures
+        :return: Valid access token
+        """
+        if self._access_token is None or datetime.now() >= self._token_expiry:
+            await self._refresh_token()
+        return self._access_token
+
+    async def _refresh_token(self):
+        """
+        Authenticate and get a new app access token.
         """
         url = settings.TWITCH_TOKEN_URI
         payload = {
@@ -46,30 +53,88 @@ class TwitchApi:
 
         try:
             logger.info("Authenticating with Twitch API...")
-            response = requests.post(url, data=payload, timeout=10)
-            response.raise_for_status()
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, data=payload, timeout=10)
+                response.raise_for_status()
 
-            data = response.json()
-            if "access_token" not in data:
-                logger.error("Access token not found in Twitch API response")
-                raise ValueError("Invalid authentication response from Twitch")
+                data = response.json()
+                if "access_token" not in data:
+                    logger.error("Access token not found in Twitch API response")
+                    raise ValueError("Invalid authentication response from Twitch")
 
-            token = data["access_token"]
-            logger.info("Successfully authenticated with Twitch API")
-            return token
+                self._access_token = data["access_token"]
+                # Token expires in ~60 days, but we refresh 1 hour before
+                expires_in = data.get("expires_in", 5184000)  # Default 60 days
+                self._token_expiry = datetime.now() + timedelta(
+                    seconds=expires_in - 3600
+                )
 
-        except requests.exceptions.Timeout:
+                logger.info("Successfully authenticated with Twitch API")
+
+        except httpx.TimeoutException:
             logger.error("Twitch authentication timeout")
             raise Exception("Twitch API timeout during authentication")
-        except requests.exceptions.ConnectionError as e:
+        except httpx.ConnectError as e:
             logger.error(f"Connection error during Twitch authentication: {e}")
             raise Exception(f"Failed to connect to Twitch API: {e}")
-        except requests.exceptions.HTTPError as e:
+        except httpx.HTTPStatusError as e:
             logger.error(f"HTTP error during Twitch authentication: {e}")
             raise Exception(f"Twitch authentication failed: {e}")
         except Exception as e:
             logger.error(f"Unexpected error during Twitch authentication: {e}")
             raise
+
+    async def get_headers(self):
+        """Get headers with valid access token."""
+        token = await self.get_access_token()
+        return {
+            "Client-Id": self.client_id,
+            "Authorization": f"Bearer {token}",
+        }
+
+    async def refresh_access_token(self, refresh_token):
+        try:
+            logger.info("Refreshing user access token")
+            data = {
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+            }
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    settings.TWITCH_TOKEN_URI, data=data, time_out=10
+                )
+                response.raise_for_status()
+                logger.info("Refreshed user access token successfully")
+                return response.json()
+        except Exception as e:
+            logger.info(f"Failed to refresh user access token : {e}")
+
+    def is_token_valid(self, access_token):
+        """
+        Verify if the access token is still valid and return it's data
+            Args:
+                - OAuth user access token
+            Return:
+               - {'valid': bool, 'expires_in': int, 'scopes': list}
+        """
+        url = settings.TWITCH_OAUTH2_VALIDATE
+        try:
+            header = {"Authorization": f"OAuth {access_token}"}
+            response = requests.get(url, headers=header)
+
+            if response.status_code == 401:
+                logger.info("The user access token is expired")
+                return {"valid": False, "expires_in": 0}
+
+            data = response.json()
+            return {"valid": True, "expires_in": data.get("expires_in")}
+
+        except Exception as e:
+            logger.info(
+                f"Error validation token , the access token may be expired : {e}"
+            )
 
     def get_broadcaster_id(self, username):
         """
@@ -84,7 +149,13 @@ class TwitchApi:
             logger.info(f"Fetching broadcaster ID for username: {username}")
 
             response = requests.get(
-                url, headers=self.headers, params=params, timeout=10
+                url,
+                headers={
+                    "Client-Id": self.client_id,
+                    "Authorization": f"Bearer {self._access_token}",
+                },
+                params=params,
+                timeout=10,
             )
             response.raise_for_status()
 
@@ -127,7 +198,13 @@ class TwitchApi:
             logger.info(f"Fetching clips for broadcaster {brodcaster_id}")
 
             response = requests.get(
-                url, headers=self.headers, params=params, timeout=10
+                url,
+                headers={
+                    "Client-Id": self.client_id,
+                    "Authorization": f"Bearer {self._access_token}",
+                },
+                params=params,
+                timeout=10,
             )
             response.raise_for_status()
 
@@ -137,6 +214,49 @@ class TwitchApi:
 
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to fetch clips for broadcaster {brodcaster_id}: {e}")
+            return []
+
+    def download_broadcaster_clips(
+        self, editor_id, broadcaster_id, clip_id, user_token
+    ):
+        """
+        Download clips for a broadcaster.
+
+        :param editor_id: Editor ID
+        :param broadcaster_id: Broadcaster ID
+        :param clip_id: Clip ID
+        :return: List of clips
+        """
+        try:
+            url = f"{self.BASE_URL}/clips/downloads"
+            params = {
+                "broadcaster_id": broadcaster_id,
+                "editor_id": editor_id,
+                "clip_id": str(clip_id),
+            }
+
+            logger.info(f"Downloading clip {clip_id} for broadcaster {broadcaster_id}")
+
+            response = requests.get(
+                url,
+                headers={
+                    "Client-Id": self.client_id,
+                    "Authorization": f"Bearer {user_token}",
+                },
+                params=params,
+                timeout=10,
+            )
+
+            response.raise_for_status()
+            clips = response.json().get("data", [])
+            logger.info(
+                f"Retrieved {len(clips)} clips for broadcaster {broadcaster_id}"
+            )
+            return clips
+        except requests.exceptions.RequestException as e:
+            logger.error(
+                f"Failed to download clips for broadcaster {broadcaster_id}: {e}"
+            )
             return []
 
     def get_game_info(self, game_id):
@@ -168,18 +288,3 @@ class TwitchApi:
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to fetch game info for game_id {game_id}: {e}")
             return None
-
-    def download_clips(self, broadcaster_id, clip_id, editor_id=""):
-        url = f"{self.BASE_URL}/clips/downloads"
-        params = {
-            "broadcaster_id": broadcaster_id,
-            "editor_id": editor_id,
-            "clip_id": clip_id,
-        }
-        response = requests.get(url, headers=self.headers, params=params)
-        if response.status_code == 200:
-            return response.json().get("data", [])
-        logging.error(
-            f"Failed to Download clip : {clip_id} for broadcaster {broadcaster_id}: {response.text}"
-        )
-        return []
