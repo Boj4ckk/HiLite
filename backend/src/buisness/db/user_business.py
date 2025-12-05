@@ -7,9 +7,12 @@ logger = setup_logger()
 
 
 class UserBusiness:
-    def __init__(self, supabase: SupaBase, user_repository: UserRepository):
+    def __init__(
+        self, supabase: SupaBase, user_repository: UserRepository, supabase_jwt=None
+    ):
         self.supabase = supabase
         self.user_repository = user_repository
+        self.supabase_jwt = supabase_jwt
 
     def sync_user(self, token):
         user = self.supabase.get_user_from_token(token)
@@ -51,3 +54,15 @@ class UserBusiness:
             return None
 
         return user_model
+
+    def asign_access_token(self, access_token, refresh_token, user: User):
+        user_data = {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "profile_picture": user.profile_picture,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        }
+        user_model = User(**user_data)
+        self.user_repository.create_or_update(user_model)
