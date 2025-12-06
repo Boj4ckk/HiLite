@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     BACKEND_URL: str = "http://localhost:8000"
 
     CORS_ALLOWED_ORIGINS: str =  "https://hilite-frontend.onrender.com",
-     
+
 
     class Config:
         env_file = ".env"
