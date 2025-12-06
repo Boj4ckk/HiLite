@@ -17,7 +17,7 @@ function App() {
     try {
       console.log('🔑 Envoi des tokens au backend...')
       
-      const response = await fetch('http://localhost:8000/auth/me', {
+      const response = await fetch('https://hilite-7hl5.onrender.com/auth/me', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
